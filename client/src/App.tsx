@@ -53,12 +53,14 @@ function App() {
         <Switch>
           <Route path="/" component={HomePage} />
           <Route path="/creators" component={BrowseCreators} />
-          <Route path="/creators/:username" component={CreatorProfile} />
+          <Route path="/creators/:username">
+            {(params) => <CreatorProfile username={params.username} />}
+          </Route>
           <Route path="/jobs" component={BrowseJobs} />
           <Route path="/jobs/create" component={CreateJob} />
+          <Route path="/dashboard" component={CreatorDashboard} />
           <Route path="/client/dashboard" component={ClientDashboard} />
-          <Route path="/dashboard" component={user?.role === 'creator' ? CreatorDashboard : ClientDashboard} />
-          <Route path="*" component={NotFound} />
+          <Route component={NotFound} />
         </Switch>
       </main>
     </div>

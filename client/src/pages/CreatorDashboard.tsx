@@ -27,13 +27,9 @@ interface CreatorProfile {
   averageViews?: number | null;
   engagementRate?: string | null;
   contentCategories?: string[] | null;
-  showcaseContent?: Array<{
-    platform: string;
-    url: string;
-  }> | null;
   ratePerPost?: string | null;
   availability: boolean;
-  podcastListeners?: number | null; // Added podcastListeners
+  podcastListeners?: number | null;
 }
 
 interface VerificationStatus {
@@ -74,6 +70,21 @@ export default function CreatorDashboard() {
       </div>
     );
   }
+
+  const initialProfileData = {
+    instagram: profile?.instagram || "",
+    youtube: profile?.youtube || "",
+    tiktok: profile?.tiktok || "",
+    twitter: profile?.twitter || "",
+    instagramFollowers: profile?.instagramFollowers,
+    youtubeSubscribers: profile?.youtubeSubscribers,
+    tiktokFollowers: profile?.tiktokFollowers,
+    twitterFollowers: profile?.twitterFollowers,
+    averageViews: profile?.averageViews,
+    engagementRate: profile?.engagementRate || "",
+    ratePerPost: profile?.ratePerPost || "",
+    availability: profile?.availability ?? true,
+  };
 
   return (
     <div className="space-y-8">
@@ -159,7 +170,7 @@ export default function CreatorDashboard() {
           <CardTitle>Profile Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <CreatorProfileEditor initialData={profile} />
+          <CreatorProfileEditor initialData={initialProfileData} />
         </CardContent>
       </Card>
     </div>

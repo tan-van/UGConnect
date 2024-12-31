@@ -81,6 +81,34 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // New endpoint for updating application status
+  app.put("/api/applications/:id/status", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== 'employer') {
+      return res.status(403).send("Only employers can update application status");
+    }
+
+    const { status } = req.body;
+    if (!["pending", "accepted", "rejected"].includes(status)) {
+      return res.status(400).send("Invalid status");
+    }
+
+    try {
+      const [application] = await db
+        .update(applications)
+        .set({ status })
+        .where(eq(applications.id, parseInt(req.params.id)))
+        .returning();
+
+      if (!application) {
+        return res.status(404).send("Application not found");
+      }
+
+      res.json(application);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update application status" });
+    }
+  });
+
   app.get("/api/applications", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).send("Not authenticated");
@@ -90,17 +118,15 @@ export function registerRoutes(app: Express): Server {
       let userApplications;
 
       if (req.user.role === 'employer') {
-        // For employers, get applications for their jobs
         userApplications = await db.query.applications.findMany({
           with: {
             seeker: true,
             job: true
           },
-          where: (applications, { eq }) => 
+          where: (applications, { eq }) =>
             eq(applications.jobId, req.query.jobId ? parseInt(req.query.jobId as string) : applications.jobId)
         });
       } else {
-        // For job seekers, get their applications
         userApplications = await db.query.applications.findMany({
           where: eq(applications.seekerId, req.user.id),
           with: {

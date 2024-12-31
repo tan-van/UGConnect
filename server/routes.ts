@@ -2,37 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { users, creatorProfiles, jobs } from "@db/schema";
+import { users, creatorProfiles } from "@db/schema";
 import { eq } from "drizzle-orm";
 import * as crypto from 'crypto';
-
-// Social media platform OAuth configurations
-const platformConfigs = {
-  instagram: {
-    authUrl: 'https://api.instagram.com/oauth/authorize',
-    clientId: process.env.INSTAGRAM_CLIENT_ID,
-    redirectUri: `${process.env.APP_URL}/api/connect/instagram/callback`,
-    scope: 'basic',
-  },
-  youtube: {
-    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-    clientId: process.env.YOUTUBE_CLIENT_ID,
-    redirectUri: `${process.env.APP_URL}/api/connect/youtube/callback`,
-    scope: 'https://www.googleapis.com/auth/youtube.readonly',
-  },
-  twitter: {
-    authUrl: 'https://twitter.com/i/oauth2/authorize',
-    clientId: process.env.TWITTER_CLIENT_ID,
-    redirectUri: `${process.env.APP_URL}/api/connect/twitter/callback`,
-    scope: 'users.read tweet.read',
-  },
-  tiktok: {
-    authUrl: 'https://www.tiktok.com/auth/authorize/',
-    clientId: process.env.TIKTOK_CLIENT_ID,
-    redirectUri: `${process.env.APP_URL}/api/connect/tiktok/callback`,
-    scope: 'user.info.basic',
-  },
-};
 
 async function hash(password: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -537,6 +509,7 @@ export function registerRoutes(app: Express): Server {
   // List all creators with their profiles
   app.get("/api/creators", async (req, res) => {
     try {
+      console.log("Fetching creators...");
       let creators = await db
         .select({
           id: users.id,
@@ -564,8 +537,11 @@ export function registerRoutes(app: Express): Server {
         .leftJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
 
+      console.log("Initial creators count:", creators.length);
+
       // If no creators exist, create sample data
       if (creators.length === 0) {
+        console.log("No creators found, creating sample data...");
         const sampleUsers = [
           {
             username: "gamingstar",
@@ -606,30 +582,12 @@ export function registerRoutes(app: Express): Server {
             bio: "Certified personal trainer sharing workouts, nutrition tips, and wellness advice",
             completedOnboarding: true,
             createdAt: new Date(),
-          },
-          {
-            username: "chefcreative",
-            password: await hash("password123"),
-            email: "creator@cooking.com",
-            role: 'creator' as const,
-            displayName: "Chef Creative",
-            bio: "Culinary artist sharing easy-to-follow recipes and cooking tips",
-            completedOnboarding: true,
-            createdAt: new Date(),
-          },
-          {
-            username: "wanderlustcreator",
-            password: await hash("password123"),
-            email: "creator@travel.com",
-            role: 'creator' as const,
-            displayName: "Wanderlust Creator",
-            bio: "Travel vlogger showcasing hidden gems and cultural experiences worldwide",
-            completedOnboarding: true,
-            createdAt: new Date(),
           }
         ];
 
+        console.log("Creating sample users...");
         const insertedUsers = await db.insert(users).values(sampleUsers).returning();
+        console.log("Created users count:", insertedUsers.length);
 
         const creatorProfileData = insertedUsers.map(user => {
           let categories, ratePerPost;
@@ -651,14 +609,9 @@ export function registerRoutes(app: Express): Server {
               categories = ['Fitness', 'Health', 'Wellness'];
               ratePerPost = "$900-1800 per workout video";
               break;
-            case 'chefcreative':
-              categories = ['Cooking', 'Food', 'Lifestyle'];
-              ratePerPost = "$700-1400 per recipe video";
-              break;
-            case 'wanderlustcreator':
-              categories = ['Travel', 'Lifestyle', 'Culture'];
-              ratePerPost = "$1200-2400 per travel vlog";
-              break;
+            default:
+              categories = ['Lifestyle', 'General'];
+              ratePerPost = "$500-1000 per post";
           }
 
           return {
@@ -674,17 +627,13 @@ export function registerRoutes(app: Express): Server {
             averageViews: Math.floor(Math.random() * 100000) + 10000,
             engagementRate: (Math.random() * 5 + 1).toFixed(2) + "%",
             contentCategories: categories,
-            showcaseContent: [
-              'https://example.com/content1',
-              'https://example.com/content2',
-              'https://example.com/content3',
-            ],
             ratePerPost,
             availability: true,
             lastUpdated: new Date(),
           };
         });
 
+        console.log("Creating creator profiles...");
         await db.insert(creatorProfiles).values(creatorProfileData);
 
         // Fetch the newly created creators
@@ -716,6 +665,7 @@ export function registerRoutes(app: Express): Server {
           .where(eq(users.role, 'creator'));
       }
 
+      console.log("Final creators count:", creators.length);
       res.json(creators);
     } catch (error) {
       console.error("Error fetching creators:", error);
@@ -727,3 +677,33 @@ export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
   return httpServer;
 }
+
+// Social media platform OAuth configurations
+const platformConfigs = {
+  instagram: {
+    authUrl: 'https://api.instagram.com/oauth/authorize',
+    clientId: process.env.INSTAGRAM_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/instagram/callback`,
+    scope: 'basic',
+  },
+  youtube: {
+    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+    clientId: process.env.YOUTUBE_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/youtube/callback`,
+    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+  },
+  twitter: {
+    authUrl: 'https://twitter.com/i/oauth2/authorize',
+    clientId: process.env.TWITTER_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/twitter/callback`,
+    scope: 'users.read tweet.read',
+  },
+  tiktok: {
+    authUrl: 'https://www.tiktok.com/auth/authorize/',
+    clientId: process.env.TIKTOK_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/tiktok/callback`,
+    scope: 'user.info.basic',
+  },
+};
+
+import { jobs } from "@db/schema";

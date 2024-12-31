@@ -49,6 +49,7 @@ interface CreatorProfileData {
     platform: string;
     url: string;
   }>;
+  reviews?: any[]; // Added reviews section to the interface
 }
 
 export default function CreatorProfile() {
@@ -100,7 +101,7 @@ export default function CreatorProfile() {
   const isClient = user?.role === 'client';
 
   return (
-    <div className="space-y-8">
+    <div className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
       {/* Profile Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-4">

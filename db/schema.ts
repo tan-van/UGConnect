@@ -14,6 +14,7 @@ export const users = pgTable("users", {
   displayName: text("display_name"),
   bio: text("bio"),
   avatar: text("avatar_url"),
+  completedOnboarding: boolean("completed_onboarding").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

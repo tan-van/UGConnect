@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
@@ -19,7 +18,7 @@ import {
 import { useUser } from "@/hooks/use-user";
 import ReviewsList from "@/components/ReviewsList";
 import ReviewForm from "@/components/ReviewForm";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface CreatorProfileData {
@@ -150,49 +149,54 @@ export default function CreatorProfile() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Social Stats Cards */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <SiInstagram className="h-5 w-5 text-pink-500" />
-              <div className="flex items-center">
-                <p className="font-semibold">Instagram</p>
-                {profile.instagramVerified && (
-                  <Badge variant="secondary" className="ml-2">
-                    <BadgeCheck className="h-3 w-3 mr-1" />
-                    Verified
-                  </Badge>
-                )}
+        {profile.instagramFollowers && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2">
+                <SiInstagram className="h-5 w-5 text-pink-500" />
+                <div className="flex items-center">
+                  <p className="font-semibold">Instagram</p>
+                  {profile.instagramVerified && (
+                    <Badge variant="secondary" className="ml-2">
+                      <BadgeCheck className="h-3 w-3 mr-1" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
-            <p className="text-2xl font-bold mt-2">
-              {profile.instagramFollowers?.toLocaleString() || 'N/A'}
-            </p>
-            <p className="text-sm text-muted-foreground">Followers</p>
-          </CardContent>
-        </Card>
+              <p className="text-2xl font-bold mt-2">
+                {profile.instagramFollowers?.toLocaleString() || 'N/A'}
+              </p>
+              <p className="text-sm text-muted-foreground">Followers</p>
+            </CardContent>
+          </Card>
+        )}
+        {/* Other social media cards (if needed) */}
+      </div>
 
-        {/* Reviews Section */}
-        <div className="space-y-4 col-span-full">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Reviews</h2>
-            {isClient && (
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>Write a Review</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogTitle>Write a Review</DialogTitle>
+      {/* Reviews Section */}
+      <div className="space-y-4 col-span-full">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Reviews</h2>
+          {isClient && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>Write a Review</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Write a Review</h3>
                   <ReviewForm
                     creatorId={profile.id}
                     onSuccess={handleReviewSuccess}
                     onClose={() => setDialogOpen(false)}
                   />
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-          <ReviewsList creatorId={profile.id} />
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
+        <ReviewsList creatorId={profile.id} />
       </div>
     </div>
   );

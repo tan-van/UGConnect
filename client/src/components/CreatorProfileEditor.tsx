@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { BadgeCheck, Link as LinkIcon, Twitter } from "lucide-react";
 import { format } from "date-fns";
@@ -208,229 +209,263 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => updateProfileMutation.mutate(data))} className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="instagram"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  <SiInstagram className="h-4 w-4 text-pink-500" />
-                  Instagram Handle
-                  {renderVerificationBadge('instagram')}
-                  {renderConnectButton('instagram')}
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="@username" {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={form.handleSubmit((data) => updateProfileMutation.mutate(data))} className="space-y-8">
+        {/* Social Media Connections */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Social Media Accounts</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="instagram"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <SiInstagram className="h-4 w-4 text-pink-500" />
+                      Instagram Handle
+                      {renderVerificationBadge('instagram')}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="@username" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                    {renderConnectButton('instagram')}
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="youtube"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  <SiYoutube className="h-4 w-4 text-red-500" />
-                  YouTube Channel
-                  {renderVerificationBadge('youtube')}
-                  {renderConnectButton('youtube')}
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="channel-name" {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="youtube"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <SiYoutube className="h-4 w-4 text-red-500" />
+                      YouTube Channel
+                      {renderVerificationBadge('youtube')}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="channel-name" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                    {renderConnectButton('youtube')}
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="twitter"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  <Twitter className="h-4 w-4 text-blue-500" />
-                  Twitter Handle
-                  {renderVerificationBadge('twitter')}
-                  {renderConnectButton('twitter')}
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="@username" {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="twitter"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Twitter className="h-4 w-4 text-blue-500" />
+                      Twitter Handle
+                      {renderVerificationBadge('twitter')}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="@username" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                    {renderConnectButton('twitter')}
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="tiktok"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  <SiTiktok className="h-4 w-4" />
-                  TikTok Handle
-                  {renderVerificationBadge('tiktok')}
-                  {renderConnectButton('tiktok')}
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="@username" {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="tiktok"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <SiTiktok className="h-4 w-4" />
+                      TikTok Handle
+                      {renderVerificationBadge('tiktok')}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="@username" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                    {renderConnectButton('tiktok')}
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Audience Statistics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Audience Statistics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="instagramFollowers"
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>Instagram Followers</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0"
+                        {...field}
+                        value={value || ''}
+                        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="youtubeSubscribers"
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>YouTube Subscribers</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0"
+                        {...field}
+                        value={value || ''}
+                        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="twitterFollowers"
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>Twitter Followers</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0"
+                        {...field}
+                        value={value || ''}
+                        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tiktokFollowers"
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>TikTok Followers</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0"
+                        {...field}
+                        value={value || ''}
+                        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Performance Metrics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Performance Metrics</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="averageViews"
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>Average Views per Post</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0"
+                        {...field}
+                        value={value || ''}
+                        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ratePerPost"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rate per Post</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. $500-1000" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Availability Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Availability</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="availability"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-2">
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="!mt-0">Available for Collaborations</FormLabel>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end">
+          <Button 
+            type="submit" 
+            className="w-[200px]"
+            disabled={updateProfileMutation.isPending}
+          >
+            Save Changes
+          </Button>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="instagramFollowers"
-            render={({ field: { value, onChange, ...field } }) => (
-              <FormItem>
-                <FormLabel>Instagram Followers</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="0"
-                    {...field}
-                    value={value || ''}
-                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="youtubeSubscribers"
-            render={({ field: { value, onChange, ...field } }) => (
-              <FormItem>
-                <FormLabel>YouTube Subscribers</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="0"
-                    {...field}
-                    value={value || ''}
-                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="twitterFollowers"
-            render={({ field: { value, onChange, ...field } }) => (
-              <FormItem>
-                <FormLabel>Twitter Followers</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="0"
-                    {...field}
-                    value={value || ''}
-                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="tiktokFollowers"
-            render={({ field: { value, onChange, ...field } }) => (
-              <FormItem>
-                <FormLabel>TikTok Followers</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="0"
-                    {...field}
-                    value={value || ''}
-                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="averageViews"
-            render={({ field: { value, onChange, ...field } }) => (
-              <FormItem>
-                <FormLabel>Average Views per Post</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="0"
-                    {...field}
-                    value={value || ''}
-                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="ratePerPost"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Rate per Post</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. $500-1000" {...field} value={field.value || ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="availability"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center gap-2">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormLabel className="!mt-0">Available for Collaborations</FormLabel>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={updateProfileMutation.isPending}
-        >
-          Save Profile
-        </Button>
       </form>
     </Form>
   );

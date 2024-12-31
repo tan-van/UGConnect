@@ -682,6 +682,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { creatorId, rating, review } = req.body;
+      console.log('Received review submission:', { creatorId, rating, review });
 
       if (!creatorId || !rating || !review) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -693,6 +694,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Check if the creator exists and is actually a creator
+      console.log('Looking for creator with ID:', creatorId);
       const [creator] = await db
         .select()
         .from(users)
@@ -701,6 +703,8 @@ export function registerRoutes(app: Express): Server {
           eq(users.role, 'creator')
         ))
         .limit(1);
+
+      console.log('Creator lookup result:', creator ? 'Found' : 'Not found');
 
       if (!creator) {
         return res.status(404).json({ message: "Creator not found" });

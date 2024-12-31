@@ -43,6 +43,7 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
 
   const submitReviewMutation = useMutation({
     mutationFn: async (data: ReviewFormValues) => {
+      console.log('Submitting review with data:', { ...data, creatorId });
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: {
@@ -50,18 +51,25 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
         },
         credentials: "include",
         body: JSON.stringify({
+          creatorId: Number(creatorId),
           ...data,
-          creatorId,
         }),
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/creators/${creatorId}/reviews`] });
       form.reset();
       onSuccess?.();
+      toast({
+        title: "Success",
+        description: "Your review has been submitted.",
+      });
     },
     onError: (error: Error) => {
       toast({

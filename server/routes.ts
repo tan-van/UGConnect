@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { users, creatorProfiles } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { users, creatorProfiles, reviews } from "@db/schema";
+import { eq, and, desc, avg } from "drizzle-orm";
 import * as crypto from 'crypto';
 
 async function hash(password: string): Promise<string> {
@@ -673,6 +673,155 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+
+  // Create a review
+  app.post("/api/reviews", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    if (req.user.role !== 'client') {
+      return res.status(403).json({ message: "Only clients can leave reviews" });
+    }
+
+    try {
+      const { creatorId, jobId, rating, review } = req.body;
+
+      if (!creatorId || !rating || !review) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Validate rating is between 1 and 5
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Rating must be between 1 and 5" });
+      }
+
+      // Check if the creator exists and is actually a creator
+      const [creator] = await db
+        .select()
+        .from(users)
+        .where(and(eq(users.id, creatorId), eq(users.role, 'creator')))
+        .limit(1);
+
+      if (!creator) {
+        return res.status(404).json({ message: "Creator not found" });
+      }
+
+      // Create the review
+      const [newReview] = await db
+        .insert(reviews)
+        .values({
+          creatorId,
+          clientId: req.user.id,
+          jobId: jobId || null,
+          rating,
+          review,
+          helpfulVotes: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      res.json(newReview);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  // Get reviews for a creator
+  app.get("/api/creators/:creatorId/reviews", async (req, res) => {
+    try {
+      const { creatorId } = req.params;
+      const { limit = '10', offset = '0' } = req.query;
+
+      // First, check if creator exists
+      const [creator] = await db
+        .select()
+        .from(users)
+        .where(and(eq(users.id, parseInt(creatorId)), eq(users.role, 'creator')))
+        .limit(1);
+
+      if (!creator) {
+        return res.status(404).json({ message: "Creator not found" });
+      }
+
+      // Get reviews with client information
+      const creatorReviews = await db
+        .select({
+          id: reviews.id,
+          rating: reviews.rating,
+          review: reviews.review,
+          helpfulVotes: reviews.helpfulVotes,
+          createdAt: reviews.createdAt,
+          client: {
+            id: users.id,
+            username: users.username,
+            displayName: users.displayName,
+          },
+        })
+        .from(reviews)
+        .innerJoin(users, eq(reviews.clientId, users.id))
+        .where(eq(reviews.creatorId, parseInt(creatorId)))
+        .orderBy(desc(reviews.createdAt))
+        .limit(parseInt(limit as string))
+        .offset(parseInt(offset as string));
+
+      // Get aggregate rating
+      const [aggregateRating] = await db
+        .select({
+          averageRating: avg(reviews.rating),
+          totalReviews: db.fn.count(reviews.id),
+        })
+        .from(reviews)
+        .where(eq(reviews.creatorId, parseInt(creatorId)));
+
+      res.json({
+        reviews: creatorReviews,
+        averageRating: parseFloat(aggregateRating.averageRating?.toFixed(1) || "0"),
+        totalReviews: parseInt(aggregateRating.totalReviews.toString()),
+      });
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // Mark a review as helpful
+  app.post("/api/reviews/:reviewId/helpful", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const { reviewId } = req.params;
+
+      const [review] = await db
+        .select()
+        .from(reviews)
+        .where(eq(reviews.id, parseInt(reviewId)))
+        .limit(1);
+
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+
+      // Increment helpful votes
+      const [updatedReview] = await db
+        .update(reviews)
+        .set({
+          helpfulVotes: review.helpfulVotes + 1,
+          updatedAt: new Date(),
+        })
+        .where(eq(reviews.id, parseInt(reviewId)))
+        .returning();
+
+      res.json(updatedReview);
+    } catch (error) {
+      console.error("Error marking review as helpful:", error);
+      res.status(500).json({ message: "Failed to mark review as helpful" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

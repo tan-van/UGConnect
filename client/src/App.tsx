@@ -24,10 +24,10 @@ function App() {
 
   // Show onboarding only after successful login and if not completed
   useEffect(() => {
-    if (user && !user.completedOnboarding) {
+    if (user && !user.completedOnboarding && !showOnboarding) {
       setShowOnboarding(true);
     }
-  }, [user?.completedOnboarding]);
+  }, [user]);
 
   if (isLoading) {
     return (

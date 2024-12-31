@@ -171,9 +171,11 @@ export default function CreatorProfile() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
-              <Twitter className="h-5 w-5 text-blue-500" />
+              <svg className="h-5 w-5" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
               <div className="flex items-center">
-                <p className="font-semibold">Twitter</p>
+                <p className="font-semibold">X</p>
                 {profile.twitterVerified && (
                   <Badge variant="secondary" className="ml-2">
                     <BadgeCheck className="h-3 w-3 mr-1" />

@@ -59,6 +59,7 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
 
       if (!res.ok) {
         const errorText = await res.text();
+        console.error('Review submission error:', errorText);
         throw new Error(errorText);
       }
       return res.json();
@@ -73,6 +74,7 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
       });
     },
     onError: (error: Error) => {
+      console.error('Review submission error:', error);
       toast({
         title: "Error",
         description: error.message,

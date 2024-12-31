@@ -682,7 +682,7 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { creatorId, rating, review } = req.body;
-      console.log('Received review submission:', { creatorId, rating, review });
+      console.log('Review submission received:', { creatorId, rating, review });
 
       if (!creatorId || !rating || !review) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -694,17 +694,17 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Check if the creator exists and is actually a creator
-      console.log('Looking for creator with ID:', creatorId);
+      console.log('Looking up creator:', creatorId);
       const [creator] = await db
         .select()
         .from(users)
         .where(and(
-          eq(users.id, creatorId),
+          eq(users.id, Number(creatorId)),
           eq(users.role, 'creator')
         ))
         .limit(1);
 
-      console.log('Creator lookup result:', creator ? 'Found' : 'Not found');
+      console.log('Creator lookup result:', creator || 'Not found');
 
       if (!creator) {
         return res.status(404).json({ message: "Creator not found" });
@@ -714,9 +714,9 @@ export function registerRoutes(app: Express): Server {
       const [newReview] = await db
         .insert(reviews)
         .values({
-          creatorId,
+          creatorId: Number(creatorId),
           clientId: req.user.id,
-          rating,
+          rating: Number(rating),
           review,
           helpfulVotes: 0,
           createdAt: new Date(),
@@ -724,6 +724,7 @@ export function registerRoutes(app: Express): Server {
         })
         .returning();
 
+      console.log('Review created successfully:', newReview);
       res.json(newReview);
     } catch (error) {
       console.error("Error creating review:", error);
@@ -772,7 +773,7 @@ export function registerRoutes(app: Express): Server {
       // Get aggregate rating data
       // Calculate total reviews and average rating
       const totalReviews = creatorReviews.length;
-      const averageRating = totalReviews > 0 
+      const averageRating = totalReviews > 0
         ? (creatorReviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews).toFixed(1)
         : "0.0";
 

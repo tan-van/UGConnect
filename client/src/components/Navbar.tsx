@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Megaphone, LogOut, User, Users, LayoutDashboard } from "lucide-react";
+import { Megaphone, LogOut, User, Users, LayoutDashboard, Briefcase } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout } = useUser();
@@ -22,11 +22,19 @@ export default function Navbar() {
           </Link>
 
           <nav className="hidden md:flex gap-6">
-            <Link href="/creators">
-              <span className="text-muted-foreground hover:text-foreground transition-colors">
-                Browse Creators
-              </span>
-            </Link>
+            {user?.role === 'client' ? (
+              <Link href="/creators">
+                <span className="text-muted-foreground hover:text-foreground transition-colors">
+                  Browse Creators
+                </span>
+              </Link>
+            ) : (
+              <Link href="/jobs">
+                <span className="text-muted-foreground hover:text-foreground transition-colors">
+                  Browse Jobs
+                </span>
+              </Link>
+            )}
           </nav>
         </div>
 
@@ -50,11 +58,18 @@ export default function Navbar() {
                   <span>Dashboard</span>
                 </Link>
               </DropdownMenuItem>
-              {user?.role === 'client' && (
+              {user?.role === 'client' ? (
                 <DropdownMenuItem>
                   <Link href="/creators" className="flex items-center">
                     <Users className="mr-2 h-4 w-4" />
                     <span>Browse Creators</span>
+                  </Link>
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem>
+                  <Link href="/jobs" className="flex items-center">
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    <span>Browse Jobs</span>
                   </Link>
                 </DropdownMenuItem>
               )}

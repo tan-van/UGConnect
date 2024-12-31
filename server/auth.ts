@@ -28,7 +28,6 @@ const crypto = {
   },
 };
 
-// Extend express user object with our schema
 declare global {
   namespace Express {
     interface User {
@@ -36,8 +35,8 @@ declare global {
       username: string;
       email: string;
       role: 'creator' | 'client';
-      displayName?: string;
-      bio?: string;
+      displayName?: string | undefined;
+      bio?: string | undefined;
       createdAt: Date;
     }
   }
@@ -71,6 +70,7 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        console.log(`Attempting login for user: ${username}`);
         const [user] = await db
           .select()
           .from(users)
@@ -78,14 +78,28 @@ export function setupAuth(app: Express) {
           .limit(1);
 
         if (!user) {
+          console.log('User not found');
           return done(null, false, { message: "Invalid username or password" });
         }
+
         const isMatch = await crypto.compare(password, user.password);
         if (!isMatch) {
+          console.log('Password mismatch');
           return done(null, false, { message: "Invalid username or password" });
         }
-        return done(null, user);
+
+        console.log('Login successful');
+        return done(null, {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          displayName: user.displayName,
+          bio: user.bio,
+          createdAt: user.createdAt
+        });
       } catch (err) {
+        console.error('Login error:', err);
         return done(err);
       }
     })
@@ -102,7 +116,20 @@ export function setupAuth(app: Express) {
         .from(users)
         .where(eq(users.id, id))
         .limit(1);
-      done(null, user);
+
+      if (!user) {
+        return done(null, false);
+      }
+
+      done(null, {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        displayName: user.displayName,
+        bio: user.bio,
+        createdAt: user.createdAt
+      });
     } catch (err) {
       done(err);
     }
@@ -139,24 +166,14 @@ export function setupAuth(app: Express) {
       }
 
       // Check for existing username or email
-      const existingUser = await db
+      const [existingUser] = await db
         .select()
         .from(users)
         .where(eq(users.username, username))
         .limit(1);
 
-      if (existingUser.length > 0) {
+      if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
-      }
-
-      const existingEmail = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-
-      if (existingEmail.length > 0) {
-        return res.status(400).json({ message: "Email already exists" });
       }
 
       const hashedPassword = await crypto.hash(password);
@@ -172,13 +189,23 @@ export function setupAuth(app: Express) {
         })
         .returning();
 
-      req.login(newUser, (err) => {
+      const userForClient = {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role,
+        displayName: newUser.displayName,
+        bio: newUser.bio,
+        createdAt: newUser.createdAt
+      };
+
+      req.login(userForClient, (err) => {
         if (err) {
           return res.status(500).json({ message: "Error during login after registration" });
         }
         return res.json({
           message: "Registration successful",
-          user: newUser,
+          user: userForClient,
         });
       });
     } catch (error: any) {
@@ -194,8 +221,9 @@ export function setupAuth(app: Express) {
       return res.status(400).json({ message: "Missing username or password" });
     }
 
-    passport.authenticate("local", (err: any, user: Express.User, info: IVerifyOptions) => {
+    passport.authenticate("local", (err: any, user: Express.User | false, info: IVerifyOptions) => {
       if (err) {
+        console.error('Authentication error:', err);
         return res.status(500).json({ message: "Internal server error" });
       }
 
@@ -205,6 +233,7 @@ export function setupAuth(app: Express) {
 
       req.logIn(user, (err) => {
         if (err) {
+          console.error('Login error:', err);
           return res.status(500).json({ message: "Error during login" });
         }
 

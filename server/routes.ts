@@ -4,6 +4,7 @@ import { setupAuth } from "./auth";
 import { db } from "@db";
 import { users, creatorProfiles, jobs } from "@db/schema";
 import { eq } from "drizzle-orm";
+import * as crypto from 'crypto';
 
 // Social media platform OAuth configurations
 const platformConfigs = {
@@ -77,15 +78,96 @@ export function registerRoutes(app: Express): Server {
       let jobsData = await query;
 
       if (jobsData.length === 0 && (!type || type === 'all') && !clientId) {
-        // Insert some placeholder jobs
+        // First, check if we have any clients
         const [client] = await db
           .select()
           .from(users)
           .where(eq(users.role, 'client'))
           .limit(1);
 
-        if (client) {
-          const placeholderJobs = [
+        // If no clients exist, create some sample users first
+        if (!client) {
+          const sampleUsers = [
+            {
+              username: "techbrand",
+              password: await crypto.hash("password123"),
+              email: "tech@brand.com",
+              role: "client",
+              displayName: "Tech Brand Inc.",
+              bio: "Leading tech company looking for creative content creators",
+              completedOnboarding: true,
+              createdAt: new Date(),
+            },
+            {
+              username: "beautycorp",
+              password: await crypto.hash("password123"),
+              email: "beauty@corp.com",
+              role: "client",
+              displayName: "Beauty Corp",
+              bio: "Premium beauty brand seeking influencers",
+              completedOnboarding: true,
+              createdAt: new Date(),
+            },
+            {
+              username: "gamingstar",
+              password: await crypto.hash("password123"),
+              email: "creator@gaming.com",
+              role: "creator",
+              displayName: "Gaming Star",
+              bio: "Professional gaming content creator with 500K+ followers",
+              completedOnboarding: true,
+              createdAt: new Date(),
+            },
+            {
+              username: "beautyinfluencer",
+              password: await crypto.hash("password123"),
+              email: "creator@beauty.com",
+              role: "creator",
+              displayName: "Beauty Guru",
+              bio: "Beauty and lifestyle content creator, 1M+ followers across platforms",
+              completedOnboarding: true,
+              createdAt: new Date(),
+            },
+          ];
+
+          const insertedUsers = await db.insert(users).values(sampleUsers).returning();
+
+          // Create creator profiles for creator users
+          const creatorUsers = insertedUsers.filter(user => user.role === 'creator');
+          const creatorProfileData = creatorUsers.map(user => ({
+            userId: user.id,
+            instagram: `${user.username}`,
+            youtube: `${user.username}`,
+            tiktok: `${user.username}`,
+            twitter: `${user.username}`,
+            instagramFollowers: Math.floor(Math.random() * 500000) + 100000,
+            youtubeSubscribers: Math.floor(Math.random() * 1000000) + 50000,
+            tiktokFollowers: Math.floor(Math.random() * 800000) + 200000,
+            twitterFollowers: Math.floor(Math.random() * 300000) + 50000,
+            averageViews: Math.floor(Math.random() * 100000) + 10000,
+            engagementRate: (Math.random() * 5 + 1).toFixed(2) + "%",
+            contentCategories: user.username.includes('gaming') 
+              ? ['Gaming', 'Entertainment', 'Technology']
+              : ['Beauty', 'Lifestyle', 'Fashion'],
+            showcaseContent: [
+              'https://example.com/content1',
+              'https://example.com/content2',
+              'https://example.com/content3',
+            ],
+            ratePerPost: user.username.includes('gaming')
+              ? "$1000-2000 per video"
+              : "$800-1500 per post",
+            availability: true,
+            lastUpdated: new Date(),
+          }));
+
+          await db.insert(creatorProfiles).values(creatorProfileData);
+
+          // Get the client users for creating jobs
+          const clientUsers = insertedUsers.filter(user => user.role === 'client');
+
+          // Create sample jobs
+          const sampleJobs = clientUsers.flatMap(client => [
             {
               title: "Looking for Gaming Content Creator",
               description: "We're seeking an energetic gaming content creator to produce entertaining gameplay videos and streaming content. Must have experience with popular gaming titles and engaging commentary.",
@@ -122,9 +204,9 @@ export function registerRoutes(app: Express): Server {
               status: 'open' as const,
               featured: true,
             }
-          ];
+          ]);
 
-          await db.insert(jobs).values(placeholderJobs);
+          await db.insert(jobs).values(sampleJobs);
 
           // Fetch the newly inserted jobs
           jobsData = await query;

@@ -11,6 +11,7 @@ import BrowseCreators from "@/pages/BrowseCreators";
 import ClientDashboard from "@/pages/ClientDashboard";
 import CreatorDashboard from "@/pages/CreatorDashboard";
 import BrowseJobs from "@/pages/BrowseJobs";
+import CreateJob from "@/pages/CreateJob";
 
 // Components
 import Navbar from "@/components/Navbar";
@@ -39,6 +40,7 @@ function App() {
           <Route path="/creators" component={BrowseCreators} />
           <Route path="/creators/:username" component={CreatorProfile} />
           <Route path="/jobs" component={BrowseJobs} />
+          <Route path="/jobs/create" component={CreateJob} />
           <Route component={NotFound} />
         </Switch>
       </main>

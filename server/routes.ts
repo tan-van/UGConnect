@@ -39,7 +39,7 @@ export function registerRoutes(app: Express): Server {
   // Add jobs route
   app.get("/api/jobs", async (req, res) => {
     try {
-      const { type } = req.query;
+      const { type, clientId } = req.query;
 
       let query = db
         .select({
@@ -62,35 +62,21 @@ export function registerRoutes(app: Express): Server {
         .innerJoin(users, eq(jobs.clientId, users.id))
         .where(eq(jobs.status, 'open'));
 
-      // Only apply type filter if it's not 'all'
-      if (type && type !== 'all') {
+      // Apply clientId filter if provided
+      if (clientId) {
+        query = query.where(eq(jobs.clientId, parseInt(clientId as string)));
+      }
+
+      // Only apply type filter if it's not 'all' and clientId is not provided
+      if (type && type !== 'all' && !clientId) {
         const jobType = type as string;
-        query = db.select({
-          id: jobs.id,
-          title: jobs.title,
-          description: jobs.description,
-          requirements: jobs.requirements,
-          budget: jobs.budget,
-          location: jobs.location,
-          remote: jobs.remote,
-          type: jobs.type,
-          status: jobs.status,
-          featured: jobs.featured,
-          createdAt: jobs.createdAt,
-          client: {
-            displayName: users.displayName,
-          },
-        })
-        .from(jobs)
-        .innerJoin(users, eq(jobs.clientId, users.id))
-        .where(eq(jobs.status, 'open'))
-        .where(eq(jobs.type, jobType));
+        query = query.where(eq(jobs.type, jobType));
       }
 
       // If no jobs exist yet, insert some placeholder data
       let jobsData = await query;
 
-      if (jobsData.length === 0 && (!type || type === 'all')) {
+      if (jobsData.length === 0 && (!type || type === 'all') && !clientId) {
         // Insert some placeholder jobs
         const [client] = await db
           .select()
@@ -149,6 +135,33 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error fetching jobs:", error);
       res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  // Add this after the GET /api/jobs endpoint
+  app.post("/api/jobs", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    if (req.user.role !== 'client') {
+      return res.status(403).json({ message: "Only clients can post jobs" });
+    }
+
+    try {
+      const [job] = await db
+        .insert(jobs)
+        .values({
+          ...req.body,
+          clientId: req.user.id,
+          status: 'open',
+        })
+        .returning();
+
+      res.json(job);
+    } catch (error) {
+      console.error("Error creating job:", error);
+      res.status(500).json({ message: "Failed to create job" });
     }
   });
 

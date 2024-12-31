@@ -114,10 +114,12 @@ export default function CreatorProfile() {
           <p className="text-muted-foreground">
             You haven't set up your creator profile yet.
           </p>
-          <Link to="/dashboard">
-            <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90">
-              Set Up Profile
-            </button>
+          <button 
+            onClick={() => window.location.href = '/dashboard'} 
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+          >
+            Set Up Profile
+          </button>
           </Link>
         </div>
       );

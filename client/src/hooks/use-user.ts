@@ -66,6 +66,13 @@ export function useUser() {
         });
       }
     },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   });
 
   const registerMutation = useMutation({
@@ -85,6 +92,13 @@ export function useUser() {
         });
       }
     },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   });
 
   const logoutMutation = useMutation({
@@ -104,6 +118,13 @@ export function useUser() {
         });
       }
     },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   });
 
   return {

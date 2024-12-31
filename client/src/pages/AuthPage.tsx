@@ -42,14 +42,14 @@ const registerSchema = z.object({
     required_error: "Please select a role",
   }),
   companyName: z.string().optional(),
-}).refine((data) => {
-  if (data.role === "employer") {
-    return !!data.companyName;
+}).superRefine((data, ctx) => {
+  if (data.role === "employer" && !data.companyName?.trim()) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Company name is required for employers",
+      path: ["companyName"],
+    });
   }
-  return true;
-}, {
-  message: "Company name is required for employers",
-  path: ["companyName"],
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -199,7 +199,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Company Name</FormLabel>
                           <FormControl>
-                            <Input {...field} value={field.value || ''} />
+                            <Input {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -13,10 +13,12 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="py-20 text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          Connect with Top Content Creators
+          {user?.role === 'creator' ? 'Connect with Brands Looking for UGC' : 'Connect with Top Content Creators'}
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          UGConnect bridges the gap between brands and content creators, making collaboration seamless and efficient.
+          {user?.role === 'creator' 
+            ? 'Find brands seeking authentic content creators and build lasting partnerships.'
+            : 'UGConnect bridges the gap between brands and content creators, making collaboration seamless and efficient.'}
         </p>
         {!user && (
           <div className="flex gap-4 justify-center">

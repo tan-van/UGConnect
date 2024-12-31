@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
+import { useState, useEffect } from "react";
 
 // Page imports
 import AuthPage from "@/pages/AuthPage";
@@ -15,9 +16,18 @@ import CreateJob from "@/pages/CreateJob";
 
 // Components
 import Navbar from "@/components/Navbar";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
 
 function App() {
   const { user, isLoading } = useUser();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Show onboarding only after successful login and if not completed
+  useEffect(() => {
+    if (user && !user.completedOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, [user?.completedOnboarding]);
 
   if (isLoading) {
     return (
@@ -33,6 +43,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
+      <OnboardingTutorial
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        userRole={user.role}
+      />
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <Switch>

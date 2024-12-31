@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { type Job } from "@db/schema";
 import { Building2, MapPin, Timer } from "lucide-react";
 import { Link } from "wouter";
+import ShareButtons from "./ShareButtons";
 
 interface JobCardProps {
   job: Job & { client: { displayName: string } };
@@ -58,17 +59,20 @@ export default function JobCard({ job, onApply }: JobCardProps) {
             </div>
           )}
 
-          <div className="flex gap-2">
-            <Link href={`/jobs/${job.id}`} className="flex-1">
-              <Button variant="secondary" className="w-full">
-                View Details
-              </Button>
-            </Link>
-            {onApply && (
-              <Button onClick={onApply} className="flex-1">
-                Apply Now
-              </Button>
-            )}
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2">
+              <Link href={`/jobs/${job.id}`} className="flex-1">
+                <Button variant="secondary" className="w-full">
+                  View Details
+                </Button>
+              </Link>
+              {onApply && (
+                <Button onClick={onApply} className="flex-1">
+                  Apply Now
+                </Button>
+              )}
+            </div>
+            <ShareButtons job={job} />
           </div>
         </div>
       </CardContent>

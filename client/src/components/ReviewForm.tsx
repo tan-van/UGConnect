@@ -5,11 +5,6 @@ import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import {
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Form,
   FormControl,
   FormField,
@@ -64,10 +59,6 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
       return res.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Review submitted",
-        description: "Thank you for your feedback!",
-      });
       queryClient.invalidateQueries({ queryKey: [`/api/creators/${creatorId}/reviews`] });
       form.reset();
       onSuccess?.();
@@ -82,83 +73,77 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
   });
 
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Write a Review</DialogTitle>
-      </DialogHeader>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit((data) => submitReviewMutation.mutate(data))}
+        className="space-y-6"
+      >
+        <FormField
+          control={form.control}
+          name="rating"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Rating</FormLabel>
+              <FormControl>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <button
+                      key={rating}
+                      type="button"
+                      className="p-1 hover:scale-110 transition-transform"
+                      onClick={() => field.onChange(rating)}
+                    >
+                      <Star
+                        className={`h-8 w-8 ${
+                          rating <= field.value
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit((data) => submitReviewMutation.mutate(data))}
-          className="space-y-6"
-        >
-          <FormField
-            control={form.control}
-            name="rating"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Rating</FormLabel>
-                <FormControl>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((rating) => (
-                      <button
-                        key={rating}
-                        type="button"
-                        className="p-1 hover:scale-110 transition-transform"
-                        onClick={() => field.onChange(rating)}
-                      >
-                        <Star
-                          className={`h-8 w-8 ${
-                            rating <= field.value
-                              ? "text-yellow-400 fill-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="review"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Review</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Share your experience working with this creator..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="review"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Review</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Share your experience working with this creator..."
-                    className="min-h-[100px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={submitReviewMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={submitReviewMutation.isPending}
-            >
-              Submit Review
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </DialogContent>
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={submitReviewMutation.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={submitReviewMutation.isPending}
+          >
+            Submit Review
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

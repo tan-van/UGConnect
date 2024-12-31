@@ -23,11 +23,18 @@ export default function Navbar() {
 
           <nav className="hidden md:flex gap-6">
             {user?.role === 'client' ? (
-              <Link href="/creators">
-                <span className="text-muted-foreground hover:text-foreground transition-colors">
-                  Browse Creators
-                </span>
-              </Link>
+              <>
+                <Link href="/creators">
+                  <span className="text-muted-foreground hover:text-foreground transition-colors">
+                    Browse Creators
+                  </span>
+                </Link>
+                <Link href="/client/dashboard">
+                  <span className="text-muted-foreground hover:text-foreground transition-colors">
+                    Dashboard
+                  </span>
+                </Link>
+              </>
             ) : (
               <Link href="/jobs">
                 <span className="text-muted-foreground hover:text-foreground transition-colors">

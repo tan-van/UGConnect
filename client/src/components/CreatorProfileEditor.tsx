@@ -18,16 +18,28 @@ import { useToast } from "@/hooks/use-toast";
 import { Instagram, Youtube, Twitter, Hash, BadgeCheck } from "lucide-react";
 import { format } from "date-fns";
 
+interface VerificationStatus {
+  verified: boolean;
+  verifiedAt: string | null;
+}
+
+interface VerificationStatusResponse {
+  instagram: VerificationStatus;
+  youtube: VerificationStatus;
+  twitter: VerificationStatus;
+  tiktok: VerificationStatus;
+}
+
 const profileSchema = z.object({
   instagram: z.string().optional(),
   youtube: z.string().optional(),
   tiktok: z.string().optional(),
   twitter: z.string().optional(),
-  instagramFollowers: z.number().optional(),
-  youtubeSubscribers: z.number().optional(),
-  tiktokFollowers: z.number().optional(),
-  twitterFollowers: z.number().optional(),
-  averageViews: z.number().optional(),
+  instagramFollowers: z.coerce.number().optional(),
+  youtubeSubscribers: z.coerce.number().optional(),
+  tiktokFollowers: z.coerce.number().optional(),
+  twitterFollowers: z.coerce.number().optional(),
+  averageViews: z.coerce.number().optional(),
   engagementRate: z.string().optional(),
   ratePerPost: z.string().optional(),
   availability: z.boolean().default(true),
@@ -54,7 +66,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
     },
   });
 
-  const { data: verificationStatus } = useQuery({
+  const { data: verificationStatus } = useQuery<VerificationStatusResponse>({
     queryKey: ['/api/profile/verification-status'],
   });
 
@@ -86,7 +98,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
   });
 
   const verifyPlatformMutation = useMutation({
-    mutationFn: async (platform: string) => {
+    mutationFn: async (platform: 'instagram' | 'youtube' | 'twitter' | 'tiktok') => {
       const res = await fetch(`/api/profile/verify/${platform}`, {
         method: "POST",
         credentials: "include",
@@ -110,7 +122,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
     },
   });
 
-  const renderVerificationBadge = (platform: string) => {
+  const renderVerificationBadge = (platform: keyof VerificationStatusResponse) => {
     if (!verificationStatus?.[platform]) return null;
 
     const { verified, verifiedAt } = verificationStatus[platform];
@@ -129,7 +141,11 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
     }
 
     return (
-      <Badge className="ml-2 bg-blue-500" title={`Verified on ${format(new Date(verifiedAt), 'PPP')}`}>
+      <Badge 
+        className="ml-2" 
+        variant="secondary"
+        title={verifiedAt ? `Verified on ${format(new Date(verifiedAt), 'PPP')}` : 'Verified'}
+      >
         <BadgeCheck className="h-3 w-3 mr-1" />
         Verified
       </Badge>
@@ -225,7 +241,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
-                    onChange={e => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -244,7 +259,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
-                    onChange={e => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -263,7 +277,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
-                    onChange={e => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -282,7 +295,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
-                    onChange={e => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -303,7 +315,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
-                    onChange={e => field.onChange(e.target.valueAsNumber)}
                   />
                 </FormControl>
                 <FormMessage />

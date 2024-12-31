@@ -57,9 +57,11 @@ export default function CreatorDashboard() {
     enabled: !!user,
   });
 
-  const isLoading = isProfileLoading || isVerificationLoading;
+  if (!user) {
+    return null;
+  }
 
-  if (isLoading) {
+  if (isProfileLoading || isVerificationLoading) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-8 w-64" />
@@ -104,7 +106,7 @@ export default function CreatorDashboard() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 Instagram Followers
-                {verificationStatus?.instagram.verified && (
+                {verificationStatus?.instagram?.verified && (
                   <Badge variant="secondary" className="ml-2">
                     <BadgeCheck className="h-3 w-3 mr-1" />
                     Verified
@@ -126,7 +128,7 @@ export default function CreatorDashboard() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 YouTube Subscribers
-                {verificationStatus?.youtube.verified && (
+                {verificationStatus?.youtube?.verified && (
                   <Badge variant="secondary" className="ml-2">
                     <BadgeCheck className="h-3 w-3 mr-1" />
                     Verified
@@ -148,7 +150,7 @@ export default function CreatorDashboard() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 X Followers
-                {verificationStatus?.twitter.verified && (
+                {verificationStatus?.twitter?.verified && (
                   <Badge variant="secondary" className="ml-2">
                     <BadgeCheck className="h-3 w-3 mr-1" />
                     Verified
@@ -159,7 +161,7 @@ export default function CreatorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {profile?.twitterFollowers?.toLocaleString() || '0'}
+                {profile.twitterFollowers?.toLocaleString() || '0'}
               </div>
             </CardContent>
           </Card>

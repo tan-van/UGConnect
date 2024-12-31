@@ -43,11 +43,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <OnboardingTutorial
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        userRole={user.role}
-      />
+      {showOnboarding && (
+        <OnboardingTutorial
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          userRole={user.role}
+        />
+      )}
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <Switch>
@@ -58,7 +60,9 @@ function App() {
           </Route>
           <Route path="/jobs" component={BrowseJobs} />
           <Route path="/jobs/create" component={CreateJob} />
-          <Route path="/dashboard" component={CreatorDashboard} />
+          <Route path="/dashboard">
+            {user.role === 'creator' ? <CreatorDashboard /> : <ClientDashboard />}
+          </Route>
           <Route path="/client/dashboard" component={ClientDashboard} />
           <Route component={NotFound} />
         </Switch>

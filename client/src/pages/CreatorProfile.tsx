@@ -296,7 +296,7 @@ export default function CreatorProfile() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {profile.showcaseContent?.map((content, index) => (
+              {Array.isArray(profile.showcaseContent) && profile.showcaseContent.map((content, index) => (
                 <Card key={index}>
                   <CardContent className="pt-6">
                     <p className="font-semibold">{content.platform}</p>

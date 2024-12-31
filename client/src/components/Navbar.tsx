@@ -21,7 +21,9 @@ export default function Navbar() {
             <span className="font-bold">UGConnect</span>
           </Link>
 
-          <nav className="hidden md:flex gap-6">
+          import { Link } from "wouter";
+
+<nav className="hidden md:flex gap-6">
             {user?.role === 'client' ? (
               <>
                 <Link href="/creators">

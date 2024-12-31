@@ -26,6 +26,16 @@ export const creatorProfiles = pgTable("creator_profiles", {
   youtube: text("youtube"),
   tiktok: text("tiktok"),
   twitter: text("twitter"),
+  // Verification status
+  instagramVerified: boolean("instagram_verified").default(false),
+  youtubeVerified: boolean("youtube_verified").default(false),
+  tiktokVerified: boolean("tiktok_verified").default(false),
+  twitterVerified: boolean("twitter_verified").default(false),
+  // Verification timestamps
+  instagramVerifiedAt: timestamp("instagram_verified_at"),
+  youtubeVerifiedAt: timestamp("youtube_verified_at"),
+  tiktokVerifiedAt: timestamp("tiktok_verified_at"),
+  twitterVerifiedAt: timestamp("twitter_verified_at"),
   // Social stats
   instagramFollowers: integer("instagram_followers"),
   youtubeSubscribers: integer("youtube_subscribers"),

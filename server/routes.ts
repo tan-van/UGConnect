@@ -104,6 +104,104 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Initiate social media verification
+  app.post("/api/profile/verify/:platform", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    if (req.user.role !== 'creator') {
+      return res.status(403).json({ message: "Only creators can verify their profiles" });
+    }
+
+    const platform = req.params.platform;
+    const validPlatforms = ['instagram', 'youtube', 'tiktok', 'twitter'];
+
+    if (!validPlatforms.includes(platform)) {
+      return res.status(400).json({ message: "Invalid platform" });
+    }
+
+    try {
+      const [profile] = await db
+        .select()
+        .from(creatorProfiles)
+        .where(eq(creatorProfiles.userId, req.user.id))
+        .limit(1);
+
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+
+      if (!profile[platform]) {
+        return res.status(400).json({ message: `${platform} handle not set` });
+      }
+
+      // Here we would normally initiate the actual verification process
+      // For now, we'll simulate it by marking as verified
+      const verificationData = {
+        [`${platform}Verified`]: true,
+        [`${platform}VerifiedAt`]: new Date(),
+      };
+
+      const [updatedProfile] = await db
+        .update(creatorProfiles)
+        .set(verificationData)
+        .where(eq(creatorProfiles.userId, req.user.id))
+        .returning();
+
+      res.json({
+        message: `${platform} verification initiated successfully`,
+        profile: updatedProfile,
+      });
+    } catch (error) {
+      console.error(`Error verifying ${platform}:`, error);
+      res.status(500).json({ message: `Failed to verify ${platform}` });
+    }
+  });
+
+  // Check verification status
+  app.get("/api/profile/verification-status", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const [profile] = await db
+        .select()
+        .from(creatorProfiles)
+        .where(eq(creatorProfiles.userId, req.user.id))
+        .limit(1);
+
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+
+      const verificationStatus = {
+        instagram: {
+          verified: profile.instagramVerified,
+          verifiedAt: profile.instagramVerifiedAt,
+        },
+        youtube: {
+          verified: profile.youtubeVerified,
+          verifiedAt: profile.youtubeVerifiedAt,
+        },
+        tiktok: {
+          verified: profile.tiktokVerified,
+          verifiedAt: profile.tiktokVerifiedAt,
+        },
+        twitter: {
+          verified: profile.twitterVerified,
+          verifiedAt: profile.twitterVerifiedAt,
+        },
+      };
+
+      res.json(verificationStatus);
+    } catch (error) {
+      console.error("Error fetching verification status:", error);
+      res.status(500).json({ message: "Failed to fetch verification status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

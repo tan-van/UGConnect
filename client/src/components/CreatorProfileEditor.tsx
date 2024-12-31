@@ -31,17 +31,17 @@ interface VerificationStatusResponse {
 }
 
 const profileSchema = z.object({
-  instagram: z.string().optional(),
-  youtube: z.string().optional(),
-  tiktok: z.string().optional(),
-  twitter: z.string().optional(),
-  instagramFollowers: z.coerce.number().optional(),
-  youtubeSubscribers: z.coerce.number().optional(),
-  tiktokFollowers: z.coerce.number().optional(),
-  twitterFollowers: z.coerce.number().optional(),
-  averageViews: z.coerce.number().optional(),
-  engagementRate: z.string().optional(),
-  ratePerPost: z.string().optional(),
+  instagram: z.string().optional().nullable(),
+  youtube: z.string().optional().nullable(),
+  tiktok: z.string().optional().nullable(),
+  twitter: z.string().optional().nullable(),
+  instagramFollowers: z.coerce.number().optional().nullable(),
+  youtubeSubscribers: z.coerce.number().optional().nullable(),
+  tiktokFollowers: z.coerce.number().optional().nullable(),
+  twitterFollowers: z.coerce.number().optional().nullable(),
+  averageViews: z.coerce.number().optional().nullable(),
+  engagementRate: z.string().optional().nullable(),
+  ratePerPost: z.string().optional().nullable(),
   availability: z.boolean().default(true),
 });
 
@@ -61,6 +61,13 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
       youtube: "",
       tiktok: "",
       twitter: "",
+      instagramFollowers: null,
+      youtubeSubscribers: null,
+      tiktokFollowers: null,
+      twitterFollowers: null,
+      averageViews: null,
+      engagementRate: "",
+      ratePerPost: "",
       availability: true,
       ...initialData,
     },
@@ -79,7 +86,10 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error);
+      }
       return res.json();
     },
     onSuccess: () => {

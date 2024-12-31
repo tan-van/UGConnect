@@ -29,7 +29,6 @@ interface CreatorProfile {
   contentCategories?: string[] | null;
   ratePerPost?: string | null;
   availability: boolean;
-  podcastListeners?: number | null;
 }
 
 interface VerificationStatus {
@@ -49,16 +48,23 @@ export default function CreatorDashboard() {
 
   const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],
-    enabled: !!user,
+    enabled: !!user && user.role === 'creator',
   });
 
   const { data: verificationStatus, isLoading: isVerificationLoading } = useQuery<VerificationStatusResponse>({
     queryKey: ['/api/profile/verification-status'],
-    enabled: !!user,
+    enabled: !!user && user.role === 'creator',
   });
 
-  if (!user) {
-    return null;
+  if (!user || user.role !== 'creator') {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold">Access Denied</h2>
+        <p className="text-muted-foreground mt-2">
+          This page is only accessible to creators.
+        </p>
+      </div>
+    );
   }
 
   if (isProfileLoading || isVerificationLoading) {

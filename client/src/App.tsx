@@ -61,10 +61,14 @@ function App() {
           <Route path="/jobs" component={BrowseJobs} />
           <Route path="/jobs/create" component={CreateJob} />
           <Route path="/dashboard">
-            {user.role === 'creator' ? <CreatorDashboard /> : <ClientDashboard />}
+            {() => user.role === 'creator' ? <CreatorDashboard /> : <ClientDashboard />}
           </Route>
-          <Route path="/client/dashboard" component={ClientDashboard} />
-          <Route component={NotFound} />
+          <Route path="/client/dashboard">
+            {() => user.role === 'client' ? <ClientDashboard /> : null}
+          </Route>
+          <Route>
+            {() => <NotFound />}
+          </Route>
         </Switch>
       </main>
     </div>

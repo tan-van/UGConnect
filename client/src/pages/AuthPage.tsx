@@ -30,16 +30,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const loginSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-  email: z.string().email(),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Invalid email address"),
   role: z.enum(["employer", "seeker"]),
-  companyName: z.string().optional(),
+  companyName: z.string().optional().or(z.literal('')).transform(val => val || null),
 });
 
 export default function AuthPage() {
@@ -61,8 +61,20 @@ export default function AuthPage() {
       password: "",
       email: "",
       role: "seeker",
+      companyName: "",
     },
   });
+
+  const onRegisterSubmit = async (data: z.infer<typeof registerSchema>) => {
+    if (data.role === "employer" && !data.companyName) {
+      registerForm.setError("companyName", {
+        type: "manual",
+        message: "Company name is required for employers"
+      });
+      return;
+    }
+    await register(data);
+  };
 
   return (
     <div className="container flex items-center justify-center min-h-screen">
@@ -116,7 +128,7 @@ export default function AuthPage() {
             </TabsContent>
             <TabsContent value="register">
               <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit((data) => register(data))} className="space-y-4">
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                   <FormField
                     control={registerForm.control}
                     name="username"

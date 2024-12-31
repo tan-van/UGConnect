@@ -38,18 +38,10 @@ const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["employer", "seeker"], {
+  role: z.enum(["creator", "client"], {
     required_error: "Please select a role",
   }),
-  companyName: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (data.role === "employer" && !data.companyName?.trim()) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Company name is required for employers",
-      path: ["companyName"],
-    });
-  }
+  displayName: z.string().optional(),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -73,8 +65,8 @@ export default function AuthPage() {
       username: "",
       password: "",
       email: "",
-      role: "seeker",
-      companyName: "",
+      role: "creator",
+      displayName: "",
     },
   });
 
@@ -84,7 +76,7 @@ export default function AuthPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome to UGConnect</CardTitle>
           <CardDescription>
-            Connect with opportunities and talent
+            Connect and collaborate with creators
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -183,29 +175,27 @@ export default function AuthPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="seeker">Job Seeker</SelectItem>
-                            <SelectItem value="employer">Employer</SelectItem>
+                            <SelectItem value="creator">Content Creator</SelectItem>
+                            <SelectItem value="client">Client</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  {registerForm.watch("role") === "employer" && (
-                    <FormField
-                      control={registerForm.control}
-                      name="companyName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Company Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  <FormField
+                    control={registerForm.control}
+                    name="displayName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Display Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <Button type="submit" className="w-full">
                     Register
                   </Button>

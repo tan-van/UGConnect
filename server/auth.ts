@@ -35,9 +35,9 @@ declare global {
       id: number;
       username: string;
       email: string;
-      role: 'employer' | 'seeker';
-      companyName: string | null;
-      bio: string | null;
+      role: 'creator' | 'client';
+      displayName?: string;
+      bio?: string;
       createdAt: Date;
     }
   }
@@ -46,7 +46,7 @@ declare global {
 export function setupAuth(app: Express) {
   const MemoryStore = createMemoryStore(session);
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.REPL_ID || "job-board-secret",
+    secret: process.env.REPL_ID || "creator-platform-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -110,7 +110,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res) => {
     try {
-      const { username, password, email, role, companyName } = req.body;
+      const { username, password, email, role, displayName } = req.body;
 
       // Validate required fields
       if (!username || !password || !email || !role) {
@@ -134,13 +134,8 @@ export function setupAuth(app: Express) {
       }
 
       // Validate role
-      if (!['employer', 'seeker'].includes(role)) {
+      if (!['creator', 'client'].includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
-      }
-
-      // Validate company name for employers
-      if (role === 'employer' && !companyName?.trim()) {
-        return res.status(400).json({ message: "Company name is required for employers" });
       }
 
       // Check for existing username or email
@@ -173,7 +168,7 @@ export function setupAuth(app: Express) {
           password: hashedPassword,
           email,
           role,
-          companyName: role === 'employer' ? companyName : null,
+          displayName: displayName || username,
         })
         .returning();
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -63,6 +63,7 @@ const clientSteps: Step[] = [
 export default function OnboardingTutorial({ isOpen, onClose, userRole }: OnboardingTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const steps = userRole === 'creator' ? creatorSteps : clientSteps;
 
   const completeTutorialMutation = useMutation({
@@ -76,6 +77,7 @@ export default function OnboardingTutorial({ isOpen, onClose, userRole }: Onboar
       return res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       toast({
         title: "Welcome aboard! 🎉",
         description: "You're all set to start using UGConnect.",
@@ -99,10 +101,17 @@ export default function OnboardingTutorial({ isOpen, onClose, userRole }: Onboar
     }
   };
 
+  const handleSkip = () => {
+    completeTutorialMutation.mutate();
+  };
+
   const CurrentIcon = steps[currentStep].Icon;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => {
+      if (completeTutorialMutation.isPending) return;
+      handleSkip();
+    }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Welcome to UGConnect!</DialogTitle>
@@ -130,7 +139,8 @@ export default function OnboardingTutorial({ isOpen, onClose, userRole }: Onboar
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={onClose}
+              onClick={handleSkip}
+              disabled={completeTutorialMutation.isPending}
             >
               Skip Tutorial
             </Button>

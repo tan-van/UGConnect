@@ -18,17 +18,17 @@ export default function Navbar() {
         <div className="flex gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <Building2 className="h-6 w-6" />
-            <span className="font-bold">JobBoard</span>
+            <span className="font-bold">UGConnect</span>
           </Link>
         </div>
-        
+
         <div className="flex flex-1 items-center justify-end space-x-4">
           {user?.role === 'employer' && (
             <Link href="/jobs/new">
               <Button>Post Job</Button>
             </Link>
           )}
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">

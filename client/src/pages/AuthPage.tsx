@@ -82,7 +82,7 @@ export default function AuthPage() {
     <div className="container flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome to JobBoard</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to UGConnect</CardTitle>
           <CardDescription>
             Connect with opportunities and talent
           </CardDescription>

@@ -597,40 +597,93 @@ export function registerRoutes(app: Express): Server {
             completedOnboarding: true,
             createdAt: new Date(),
           },
+          {
+            username: "fitnessguru",
+            password: await hash("password123"),
+            email: "creator@fitness.com",
+            role: 'creator' as const,
+            displayName: "Fitness Guru",
+            bio: "Certified personal trainer sharing workouts, nutrition tips, and wellness advice",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          },
+          {
+            username: "chefcreative",
+            password: await hash("password123"),
+            email: "creator@cooking.com",
+            role: 'creator' as const,
+            displayName: "Chef Creative",
+            bio: "Culinary artist sharing easy-to-follow recipes and cooking tips",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          },
+          {
+            username: "wanderlustcreator",
+            password: await hash("password123"),
+            email: "creator@travel.com",
+            role: 'creator' as const,
+            displayName: "Wanderlust Creator",
+            bio: "Travel vlogger showcasing hidden gems and cultural experiences worldwide",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          }
         ];
 
         const insertedUsers = await db.insert(users).values(sampleUsers).returning();
 
-        const creatorProfileData = insertedUsers.map(user => ({
-          userId: user.id,
-          instagram: `${user.username}`,
-          youtube: `${user.username}`,
-          tiktok: `${user.username}`,
-          twitter: `${user.username}`,
-          instagramFollowers: Math.floor(Math.random() * 500000) + 100000,
-          youtubeSubscribers: Math.floor(Math.random() * 1000000) + 50000,
-          tiktokFollowers: Math.floor(Math.random() * 800000) + 200000,
-          twitterFollowers: Math.floor(Math.random() * 300000) + 50000,
-          averageViews: Math.floor(Math.random() * 100000) + 10000,
-          engagementRate: (Math.random() * 5 + 1).toFixed(2) + "%",
-          contentCategories: user.username.includes('gaming')
-            ? ['Gaming', 'Entertainment', 'Technology']
-            : user.username.includes('beauty')
-            ? ['Beauty', 'Lifestyle', 'Fashion']
-            : ['Technology', 'Reviews', 'Education'],
-          showcaseContent: [
-            'https://example.com/content1',
-            'https://example.com/content2',
-            'https://example.com/content3',
-          ],
-          ratePerPost: user.username.includes('gaming')
-            ? "$1000-2000 per video"
-            : user.username.includes('beauty')
-            ? "$800-1500 per post"
-            : "$1500-2500 per review",
-          availability: true,
-          lastUpdated: new Date(),
-        }));
+        const creatorProfileData = insertedUsers.map(user => {
+          let categories, ratePerPost;
+
+          switch(user.username) {
+            case 'gamingstar':
+              categories = ['Gaming', 'Entertainment', 'Technology'];
+              ratePerPost = "$1000-2000 per video";
+              break;
+            case 'beautyinfluencer':
+              categories = ['Beauty', 'Lifestyle', 'Fashion'];
+              ratePerPost = "$800-1500 per post";
+              break;
+            case 'techreviewer':
+              categories = ['Technology', 'Reviews', 'Education'];
+              ratePerPost = "$1500-2500 per review";
+              break;
+            case 'fitnessguru':
+              categories = ['Fitness', 'Health', 'Wellness'];
+              ratePerPost = "$900-1800 per workout video";
+              break;
+            case 'chefcreative':
+              categories = ['Cooking', 'Food', 'Lifestyle'];
+              ratePerPost = "$700-1400 per recipe video";
+              break;
+            case 'wanderlustcreator':
+              categories = ['Travel', 'Lifestyle', 'Culture'];
+              ratePerPost = "$1200-2400 per travel vlog";
+              break;
+          }
+
+          return {
+            userId: user.id,
+            instagram: `${user.username}`,
+            youtube: `${user.username}`,
+            tiktok: `${user.username}`,
+            twitter: `${user.username}`,
+            instagramFollowers: Math.floor(Math.random() * 500000) + 100000,
+            youtubeSubscribers: Math.floor(Math.random() * 1000000) + 50000,
+            tiktokFollowers: Math.floor(Math.random() * 800000) + 200000,
+            twitterFollowers: Math.floor(Math.random() * 300000) + 50000,
+            averageViews: Math.floor(Math.random() * 100000) + 10000,
+            engagementRate: (Math.random() * 5 + 1).toFixed(2) + "%",
+            contentCategories: categories,
+            showcaseContent: [
+              'https://example.com/content1',
+              'https://example.com/content2',
+              'https://example.com/content3',
+            ],
+            ratePerPost,
+            availability: true,
+            lastUpdated: new Date(),
+          };
+        });
 
         await db.insert(creatorProfiles).values(creatorProfileData);
 
@@ -669,7 +722,6 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ message: "Failed to fetch creators" });
     }
   });
-
 
 
   const httpServer = createServer(app);

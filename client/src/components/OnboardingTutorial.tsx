@@ -108,9 +108,10 @@ export default function OnboardingTutorial({ isOpen, onClose, userRole }: Onboar
   const CurrentIcon = steps[currentStep].Icon;
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {
-      if (completeTutorialMutation.isPending) return;
-      handleSkip();
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open && !completeTutorialMutation.isPending) {
+        handleSkip();
+      }
     }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import CreatorProfileEditor from "@/components/CreatorProfileEditor";
 import { Instagram, Youtube, Twitter, BadgeCheck } from "lucide-react";
+import { useState } from "react";
 
 interface CreatorProfile {
   userId: number;
@@ -50,6 +51,7 @@ interface VerificationStatusResponse {
 
 export default function CreatorDashboard() {
   const { user } = useUser();
+  const [showOnboarding, setShowOnboarding] = useState(!user?.completedOnboarding);
 
   const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],
@@ -77,13 +79,11 @@ export default function CreatorDashboard() {
 
   return (
     <>
-      {user && !user.completedOnboarding && (
-        <OnboardingTutorial
-          isOpen={true}
-          onClose={() => {}}
-          userRole="creator"
-        />
-      )}
+      <OnboardingTutorial
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        userRole="creator"
+      />
 
       <div className="space-y-8">
         <div>

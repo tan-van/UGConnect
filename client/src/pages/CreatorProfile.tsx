@@ -107,14 +107,14 @@ export default function CreatorProfile() {
   }
 
   if (!profile) {
-    if (user?.username === username) {
+    if (user && user.username === username) {
       return (
         <div className="text-center py-12 space-y-4">
           <h2 className="text-2xl font-bold">Profile Not Set Up</h2>
           <p className="text-muted-foreground">
             You haven't set up your creator profile yet.
           </p>
-          <Link href="/dashboard">
+          <Link to="/dashboard">
             <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90">
               Set Up Profile
             </button>

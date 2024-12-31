@@ -49,10 +49,12 @@ export default function CreatorDashboard() {
 
   const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],
+    enabled: !!user,
   });
 
   const { data: verificationStatus, isLoading: isVerificationLoading } = useQuery<VerificationStatusResponse>({
     queryKey: ['/api/profile/verification-status'],
+    enabled: !!user,
   });
 
   const isLoading = isProfileLoading || isVerificationLoading;
@@ -72,17 +74,17 @@ export default function CreatorDashboard() {
   }
 
   const initialProfileData = {
-    instagram: profile?.instagram || "",
-    youtube: profile?.youtube || "",
-    tiktok: profile?.tiktok || "",
-    twitter: profile?.twitter || "",
-    instagramFollowers: profile?.instagramFollowers,
-    youtubeSubscribers: profile?.youtubeSubscribers,
-    tiktokFollowers: profile?.tiktokFollowers,
-    twitterFollowers: profile?.twitterFollowers,
-    averageViews: profile?.averageViews,
-    engagementRate: profile?.engagementRate || "",
-    ratePerPost: profile?.ratePerPost || "",
+    instagram: profile?.instagram ?? "",
+    youtube: profile?.youtube ?? "",
+    tiktok: profile?.tiktok ?? "",
+    twitter: profile?.twitter ?? "",
+    instagramFollowers: profile?.instagramFollowers ?? undefined,
+    youtubeSubscribers: profile?.youtubeSubscribers ?? undefined,
+    tiktokFollowers: profile?.tiktokFollowers ?? undefined,
+    twitterFollowers: profile?.twitterFollowers ?? undefined,
+    averageViews: profile?.averageViews ?? undefined,
+    engagementRate: profile?.engagementRate ?? "",
+    ratePerPost: profile?.ratePerPost ?? "",
     availability: profile?.availability ?? true,
   };
 

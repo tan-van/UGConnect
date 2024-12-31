@@ -77,7 +77,7 @@ export default function OnboardingTutorial({ isOpen, onClose, userRole }: Onboar
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       toast({
         title: "Welcome aboard! 🎉",
         description: "You're all set to start using UGConnect.",
@@ -109,7 +109,8 @@ export default function OnboardingTutorial({ isOpen, onClose, userRole }: Onboar
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open && !completeTutorialMutation.isPending) {
+      if (!open) {
+        onClose();
         handleSkip();
       }
     }}>

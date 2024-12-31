@@ -697,7 +697,7 @@ export function registerRoutes(app: Express): Server {
         .select()
         .from(users)
         .where(and(
-          eq(users.id, parseInt(creatorId.toString())),
+          eq(users.id, creatorId),
           eq(users.role, 'creator')
         ))
         .limit(1);
@@ -710,7 +710,7 @@ export function registerRoutes(app: Express): Server {
       const [newReview] = await db
         .insert(reviews)
         .values({
-          creatorId: parseInt(creatorId.toString()),
+          creatorId,
           clientId: req.user.id,
           rating,
           review,

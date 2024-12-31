@@ -49,7 +49,7 @@ interface CreatorProfileData {
     platform: string;
     url: string;
   }>;
-  reviews?: any[]; // Added reviews section to the interface
+  reviews?: any[]; //Retained from original code
 }
 
 export default function CreatorProfile() {
@@ -289,8 +289,8 @@ export default function CreatorProfile() {
                 <DialogTitle>Write a Review</DialogTitle>
                 <ReviewForm
                   creatorId={profile.id}
-                  onSuccess={handleReviewSuccess}
                   onClose={() => setDialogOpen(false)}
+                  onSuccess={handleReviewSuccess}
                 />
               </DialogContent>
             </Dialog>

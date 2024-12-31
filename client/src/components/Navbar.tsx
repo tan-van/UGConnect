@@ -16,32 +16,32 @@ export default function Navbar() {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4">
         <div className="flex gap-6 md:gap-10">
-          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <Megaphone className="h-6 w-6" />
-            <span className="font-bold">UGConnect</span>
+          <Link href="/">
+            <a className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <Megaphone className="h-6 w-6" />
+              <span className="font-bold">UGConnect</span>
+            </a>
           </Link>
 
-          import { Link } from "wouter";
-
-<nav className="hidden md:flex gap-6">
+          <nav className="hidden md:flex gap-6">
             {user?.role === 'client' ? (
               <>
                 <Link href="/creators">
-                  <span className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a className="text-muted-foreground hover:text-foreground transition-colors">
                     Browse Creators
-                  </span>
+                  </a>
                 </Link>
                 <Link href="/client/dashboard">
-                  <span className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a className="text-muted-foreground hover:text-foreground transition-colors">
                     Dashboard
-                  </span>
+                  </a>
                 </Link>
               </>
             ) : (
               <Link href="/jobs">
-                <span className="text-muted-foreground hover:text-foreground transition-colors">
+                <a className="text-muted-foreground hover:text-foreground transition-colors">
                   Browse Jobs
-                </span>
+                </a>
               </Link>
             )}
           </nav>
@@ -61,24 +61,30 @@ export default function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuItem>
-                <Link href="/" className="flex items-center">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard">
+                  <a className="flex items-center w-full">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </a>
                 </Link>
               </DropdownMenuItem>
               {user?.role === 'client' ? (
-                <DropdownMenuItem>
-                  <Link href="/creators" className="flex items-center">
-                    <Users className="mr-2 h-4 w-4" />
-                    <span>Browse Creators</span>
+                <DropdownMenuItem asChild>
+                  <Link href="/creators">
+                    <a className="flex items-center w-full">
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Browse Creators</span>
+                    </a>
                   </Link>
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem>
-                  <Link href="/jobs" className="flex items-center">
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    <span>Browse Jobs</span>
+                <DropdownMenuItem asChild>
+                  <Link href="/jobs">
+                    <a className="flex items-center w-full">
+                      <Briefcase className="mr-2 h-4 w-4" />
+                      <span>Browse Jobs</span>
+                    </a>
                   </Link>
                 </DropdownMenuItem>
               )}

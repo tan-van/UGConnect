@@ -82,25 +82,25 @@ export default function BrowseCreators() {
                 <div className="space-y-4">
                   {/* Social Media Stats */}
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    {creator.profile.instagramFollowers && (
+                    {creator.profile?.instagramFollowers && (
                       <div className="flex items-center gap-1">
                         <Instagram className="h-4 w-4 text-pink-500" />
                         <span>{(creator.profile.instagramFollowers / 1000).toFixed(1)}K</span>
                       </div>
                     )}
-                    {creator.profile.youtubeSubscribers && (
+                    {creator.profile?.youtubeSubscribers && (
                       <div className="flex items-center gap-1">
                         <Youtube className="h-4 w-4 text-red-500" />
                         <span>{(creator.profile.youtubeSubscribers / 1000).toFixed(1)}K</span>
                       </div>
                     )}
-                    {creator.profile.twitterFollowers && (
+                    {creator.profile?.twitterFollowers && (
                       <div className="flex items-center gap-1">
                         <Twitter className="h-4 w-4 text-blue-500" />
                         <span>{(creator.profile.twitterFollowers / 1000).toFixed(1)}K</span>
                       </div>
                     )}
-                    {creator.profile.tiktokFollowers && (
+                    {creator.profile?.tiktokFollowers && (
                       <div className="flex items-center gap-1">
                         <Video className="h-4 w-4" />
                         <span>{(creator.profile.tiktokFollowers / 1000).toFixed(1)}K</span>
@@ -109,7 +109,7 @@ export default function BrowseCreators() {
                   </div>
 
                   {/* Categories */}
-                  {creator.profile.contentCategories && (
+                  {creator.profile?.contentCategories && creator.profile.contentCategories.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {creator.profile.contentCategories.map((category, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
@@ -120,7 +120,7 @@ export default function BrowseCreators() {
                   )}
 
                   {/* Rate per post */}
-                  {creator.profile.ratePerPost && (
+                  {creator.profile?.ratePerPost && (
                     <div className="text-sm text-muted-foreground">
                       Rate: {creator.profile.ratePerPost}
                     </div>

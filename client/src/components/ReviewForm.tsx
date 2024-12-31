@@ -51,7 +51,7 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
         },
         credentials: "include",
         body: JSON.stringify({
-          creatorId: creatorId,
+          creatorId: Number(creatorId),
           rating: data.rating,
           review: data.review,
         }),

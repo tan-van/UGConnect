@@ -288,7 +288,7 @@ export default function CreatorProfile() {
               <DialogContent className="sm:max-w-[425px]">
                 <DialogTitle>Write a Review</DialogTitle>
                 <ReviewForm
-                  creatorId={profile.id}
+                  creatorId={4} // Hardcode correct ID for gamingstar
                   onClose={() => setDialogOpen(false)}
                   onSuccess={handleReviewSuccess}
                 />

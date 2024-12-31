@@ -56,7 +56,8 @@ function App() {
           <Route path="/creators/:username" component={CreatorProfile} />
           <Route path="/jobs" component={BrowseJobs} />
           <Route path="/jobs/create" component={CreateJob} />
-          <Route component={NotFound} />
+          <Route path="/client/dashboard" component={ClientDashboard} />
+          <Route path="*" component={NotFound} />
         </Switch>
       </main>
     </div>

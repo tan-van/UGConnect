@@ -59,7 +59,14 @@ export default function CreatorProfile() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: profile, isLoading } = useQuery<CreatorProfileData>({
-    queryKey: [`/api/creators/${username}`],
+    queryKey: ['creators', username],
+    queryFn: async () => {
+      const response = await fetch(`/api/creators/${username}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      return response.json();
+    },
     enabled: !!username,
   });
 

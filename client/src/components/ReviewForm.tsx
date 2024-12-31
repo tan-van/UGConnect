@@ -51,8 +51,8 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
         },
         credentials: "include",
         body: JSON.stringify({
-          creatorId: Number(creatorId),
           ...data,
+          creatorId, // creatorId is already a number from props
         }),
       });
 

@@ -21,7 +21,7 @@ interface JobWithClient extends Job {
 
 export default function BrowseJobs() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [jobType, setJobType] = useState<string>("");
+  const [jobType, setJobType] = useState<string>("all");
 
   const { data: jobs, isLoading } = useQuery<JobWithClient[]>({
     queryKey: ['/api/jobs', { type: jobType }],
@@ -61,7 +61,7 @@ export default function BrowseJobs() {
             <SelectValue placeholder="Job Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Types</SelectItem>
+            <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="one-time">One-time</SelectItem>
             <SelectItem value="ongoing">Ongoing</SelectItem>
           </SelectContent>

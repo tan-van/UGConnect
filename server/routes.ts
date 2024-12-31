@@ -62,12 +62,12 @@ export function registerRoutes(app: Express): Server {
         .innerJoin(users, eq(jobs.clientId, users.id))
         .where(eq(jobs.status, 'open'));
 
-      if (type) {
+      if (type && type !== 'all') {
         query = query.where(eq(jobs.type, type as string));
       }
 
       // If no jobs exist yet, insert some placeholder data
-      const jobsData = await query;
+      let jobsData = await query;
 
       if (jobsData.length === 0) {
         // Insert some placeholder jobs
@@ -88,7 +88,7 @@ export function registerRoutes(app: Express): Server {
               remote: true,
               type: "ongoing",
               clientId: client.id,
-              status: 'open',
+              status: 'open' as const,
               featured: true,
             },
             {
@@ -100,7 +100,7 @@ export function registerRoutes(app: Express): Server {
               remote: false,
               type: "one-time",
               clientId: client.id,
-              status: 'open',
+              status: 'open' as const,
               featured: false,
             },
             {
@@ -112,7 +112,7 @@ export function registerRoutes(app: Express): Server {
               remote: true,
               type: "ongoing",
               clientId: client.id,
-              status: 'open',
+              status: 'open' as const,
               featured: true,
             }
           ];

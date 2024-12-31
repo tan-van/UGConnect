@@ -32,7 +32,7 @@ export default function Navbar() {
 
         <div className="flex flex-1 items-center justify-end space-x-4">
           {user?.role === 'creator' && (
-            <Link href="/profile">
+            <Link href={`/creators/${user.username}`}>
               <Button variant="outline">View Profile</Button>
             </Link>
           )}

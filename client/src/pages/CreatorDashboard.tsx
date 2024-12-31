@@ -33,6 +33,7 @@ interface CreatorProfile {
   }> | null;
   ratePerPost?: string | null;
   availability: boolean;
+  podcastListeners?: number | null; // Added podcastListeners
 }
 
 interface VerificationStatus {
@@ -85,89 +86,71 @@ export default function CreatorDashboard() {
 
       {/* Social Stats Overview */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Instagram Followers
-              {verificationStatus?.instagram.verified && (
-                <Badge variant="secondary" className="ml-2">
-                  <BadgeCheck className="h-3 w-3 mr-1" />
-                  Verified
-                </Badge>
-              )}
-            </CardTitle>
-            <Instagram className="h-4 w-4 text-pink-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {profile?.instagramFollowers?.toLocaleString() || '0'}
-            </div>
-          </CardContent>
-        </Card>
+        {profile?.instagram && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Instagram Followers
+                {verificationStatus?.instagram.verified && (
+                  <Badge variant="secondary" className="ml-2">
+                    <BadgeCheck className="h-3 w-3 mr-1" />
+                    Verified
+                  </Badge>
+                )}
+              </CardTitle>
+              <Instagram className="h-4 w-4 text-pink-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {profile.instagramFollowers?.toLocaleString() || '0'}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              YouTube Subscribers
-              {verificationStatus?.youtube.verified && (
-                <Badge variant="secondary" className="ml-2">
-                  <BadgeCheck className="h-3 w-3 mr-1" />
-                  Verified
-                </Badge>
-              )}
-            </CardTitle>
-            <Youtube className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {profile?.youtubeSubscribers?.toLocaleString() || '0'}
-            </div>
-          </CardContent>
-        </Card>
+        {profile?.youtube && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                YouTube Subscribers
+                {verificationStatus?.youtube.verified && (
+                  <Badge variant="secondary" className="ml-2">
+                    <BadgeCheck className="h-3 w-3 mr-1" />
+                    Verified
+                  </Badge>
+                )}
+              </CardTitle>
+              <Youtube className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {profile.youtubeSubscribers?.toLocaleString() || '0'}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Podcast Listeners
-              {verificationStatus?.podcast?.verified && (
-                <Badge variant="secondary" className="ml-2">
-                  <BadgeCheck className="h-3 w-3 mr-1" />
-                  Verified
-                </Badge>
-              )}
-            </CardTitle>
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 17v-10l9 5.146-9 4.854z"/>
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {profile?.podcastListeners?.toLocaleString() || '0'}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              X Followers
-              {verificationStatus?.twitter.verified && (
-                <Badge variant="secondary" className="ml-2">
-                  <BadgeCheck className="h-3 w-3 mr-1" />
-                  Verified
-                </Badge>
-              )}
-            </CardTitle>
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {profile?.twitterFollowers?.toLocaleString() || '0'}
-            </div>
-          </CardContent>
-        </Card>
+        {profile?.twitter && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                X Followers
+                {verificationStatus?.twitter.verified && (
+                  <Badge variant="secondary" className="ml-2">
+                    <BadgeCheck className="h-3 w-3 mr-1" />
+                    Verified
+                  </Badge>
+                )}
+              </CardTitle>
+              <Twitter className="h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {profile?.twitterFollowers?.toLocaleString() || '0'}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Profile Editor */}

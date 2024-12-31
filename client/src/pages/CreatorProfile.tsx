@@ -106,7 +106,7 @@ export default function CreatorProfile() {
     );
   }
 
-  if (!profile) {
+  if (!profile || !profile.username) {
     if (user && user.username === username) {
       return (
         <div className="text-center py-12 space-y-4">
@@ -114,12 +114,12 @@ export default function CreatorProfile() {
           <p className="text-muted-foreground">
             You haven't set up your creator profile yet.
           </p>
-          <button 
-            onClick={() => window.location.href = '/dashboard'} 
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+          <Button 
+            onClick={() => window.location.href = '/dashboard'}
+            variant="default"
           >
             Set Up Profile
-          </button>
+          </Button>
         </div>
       );
     }

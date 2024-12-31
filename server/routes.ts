@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { users, creatorProfiles } from "@db/schema";
+import { users, creatorProfiles, jobs } from "@db/schema";
 import { eq } from "drizzle-orm";
 
 // Social media platform OAuth configurations
@@ -35,6 +35,101 @@ const platformConfigs = {
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
+
+  // Add jobs route
+  app.get("/api/jobs", async (req, res) => {
+    try {
+      const { type } = req.query;
+
+      let query = db
+        .select({
+          id: jobs.id,
+          title: jobs.title,
+          description: jobs.description,
+          requirements: jobs.requirements,
+          budget: jobs.budget,
+          location: jobs.location,
+          remote: jobs.remote,
+          type: jobs.type,
+          status: jobs.status,
+          featured: jobs.featured,
+          createdAt: jobs.createdAt,
+          client: {
+            displayName: users.displayName,
+          },
+        })
+        .from(jobs)
+        .innerJoin(users, eq(jobs.clientId, users.id))
+        .where(eq(jobs.status, 'open'));
+
+      if (type) {
+        query = query.where(eq(jobs.type, type as string));
+      }
+
+      // If no jobs exist yet, insert some placeholder data
+      const jobsData = await query;
+
+      if (jobsData.length === 0) {
+        // Insert some placeholder jobs
+        const [client] = await db
+          .select()
+          .from(users)
+          .where(eq(users.role, 'client'))
+          .limit(1);
+
+        if (client) {
+          const placeholderJobs = [
+            {
+              title: "Looking for Gaming Content Creator",
+              description: "We're seeking an energetic gaming content creator to produce entertaining gameplay videos and streaming content. Must have experience with popular gaming titles and engaging commentary.",
+              requirements: ["3+ years gaming content creation", "Strong presence on YouTube or Twitch", "Experience with video editing"],
+              budget: "$2000-3000 per video",
+              location: "Remote",
+              remote: true,
+              type: "ongoing",
+              clientId: client.id,
+              status: 'open',
+              featured: true,
+            },
+            {
+              title: "Beauty Product Review Creator Needed",
+              description: "Seeking a beauty influencer to create authentic product reviews and tutorials. Must have experience in beauty content creation and a genuine following in the beauty community.",
+              requirements: ["Minimum 10k followers", "Experience with beauty products", "Professional camera setup"],
+              budget: "$500 per review",
+              location: "Los Angeles",
+              remote: false,
+              type: "one-time",
+              clientId: client.id,
+              status: 'open',
+              featured: false,
+            },
+            {
+              title: "Tech Review Content Partnership",
+              description: "Looking for a tech-savvy content creator to review our latest smart home products. Must have experience in tech reviews and a good understanding of smart home technology.",
+              requirements: ["Tech background", "High production quality", "1M+ total views"],
+              budget: "$3000-5000 per month",
+              location: "San Francisco",
+              remote: true,
+              type: "ongoing",
+              clientId: client.id,
+              status: 'open',
+              featured: true,
+            }
+          ];
+
+          await db.insert(jobs).values(placeholderJobs);
+
+          // Fetch the newly inserted jobs
+          jobsData = await query;
+        }
+      }
+
+      res.json(jobsData);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
 
   // Update user's onboarding status
   app.post("/api/user/complete-onboarding", async (req, res) => {

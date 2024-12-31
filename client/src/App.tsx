@@ -10,6 +10,7 @@ import CreatorProfile from "@/pages/CreatorProfile";
 import BrowseCreators from "@/pages/BrowseCreators";
 import ClientDashboard from "@/pages/ClientDashboard";
 import CreatorDashboard from "@/pages/CreatorDashboard";
+import BrowseJobs from "@/pages/BrowseJobs";
 
 // Components
 import Navbar from "@/components/Navbar";
@@ -37,6 +38,7 @@ function App() {
           <Route path="/" component={user.role === 'creator' ? CreatorDashboard : ClientDashboard} />
           <Route path="/creators" component={BrowseCreators} />
           <Route path="/creators/:username" component={CreatorProfile} />
+          <Route path="/jobs" component={BrowseJobs} />
           <Route component={NotFound} />
         </Switch>
       </main>

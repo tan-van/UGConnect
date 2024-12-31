@@ -19,7 +19,8 @@ import {
 import { useUser } from "@/hooks/use-user";
 import ReviewsList from "@/components/ReviewsList";
 import ReviewForm from "@/components/ReviewForm";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface CreatorProfileData {
   id: number;
@@ -53,12 +54,21 @@ interface CreatorProfileData {
 export default function CreatorProfile() {
   const { username } = useParams();
   const { user } = useUser();
-  //const [showReviewForm, setShowReviewForm] = useState(false); // Removed
+  const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: profile, isLoading } = useQuery<CreatorProfileData>({
     queryKey: [`/api/creators/${username}`],
     enabled: !!username,
   });
+
+  const handleReviewSuccess = () => {
+    setDialogOpen(false);
+    toast({
+      title: "Review submitted",
+      description: "Thank you for your feedback!",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -270,14 +280,16 @@ export default function CreatorProfile() {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Reviews</h2>
           {isClient && (
-            <Dialog>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button>Write a Review</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
+                <DialogTitle>Write a Review</DialogTitle>
                 <ReviewForm
                   creatorId={profile.id}
-                  onSuccess={() => setShowReviewForm(false)}
+                  onSuccess={handleReviewSuccess}
+                  onClose={() => setDialogOpen(false)}
                 />
               </DialogContent>
             </Dialog>

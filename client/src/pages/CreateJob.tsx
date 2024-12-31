@@ -17,6 +17,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import JobCard from "@/components/JobCard";
+import { useState } from "react";
 
 const jobFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -33,6 +42,7 @@ type JobFormValues = z.infer<typeof jobFormSchema>;
 export default function CreateJob() {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
@@ -81,6 +91,18 @@ export default function CreateJob() {
   function onSubmit(values: JobFormValues) {
     createJobMutation.mutate(values);
   }
+
+  const previewJob = {
+    ...form.getValues(),
+    id: 0,
+    requirements: form.getValues().requirements.split("\n").filter(Boolean),
+    featured: false,
+    status: "open" as const,
+    createdAt: new Date(),
+    client: {
+      displayName: "You",
+    },
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -222,13 +244,29 @@ export default function CreateJob() {
             )}
           />
 
-          <Button 
-            type="submit" 
-            className="w-full"
-            disabled={createJobMutation.isPending}
-          >
-            {createJobMutation.isPending ? "Creating..." : "Create Job"}
-          </Button>
+          <div className="flex gap-4">
+            <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline" className="flex-1">
+                  Preview Job
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Job Post Preview</DialogTitle>
+                </DialogHeader>
+                <JobCard job={previewJob} />
+              </DialogContent>
+            </Dialog>
+
+            <Button 
+              type="submit" 
+              className="flex-1"
+              disabled={createJobMutation.isPending}
+            >
+              {createJobMutation.isPending ? "Creating..." : "Create Job"}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

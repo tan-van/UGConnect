@@ -3,7 +3,35 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { users, creatorProfiles } from "@db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+
+// Social media platform OAuth configurations
+const platformConfigs = {
+  instagram: {
+    authUrl: 'https://api.instagram.com/oauth/authorize',
+    clientId: process.env.INSTAGRAM_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/instagram/callback`,
+    scope: 'basic',
+  },
+  youtube: {
+    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+    clientId: process.env.YOUTUBE_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/youtube/callback`,
+    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+  },
+  twitter: {
+    authUrl: 'https://twitter.com/i/oauth2/authorize',
+    clientId: process.env.TWITTER_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/twitter/callback`,
+    scope: 'users.read tweet.read',
+  },
+  tiktok: {
+    authUrl: 'https://www.tiktok.com/auth/authorize/',
+    clientId: process.env.TIKTOK_CLIENT_ID,
+    redirectUri: `${process.env.APP_URL}/api/connect/tiktok/callback`,
+    scope: 'user.info.basic',
+  },
+};
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -201,6 +229,103 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ message: "Failed to fetch verification status" });
     }
   });
+
+  // Social media connection endpoints
+  app.get("/api/connect/:platform", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const { platform } = req.params;
+    const config = platformConfigs[platform as keyof typeof platformConfigs];
+
+    if (!config) {
+      return res.status(400).json({ message: "Invalid platform" });
+    }
+
+    if (!config.clientId) {
+      return res.status(500).json({ message: `${platform} client ID not configured` });
+    }
+
+    const state = Buffer.from(JSON.stringify({
+      userId: req.user.id,
+      platform,
+      timestamp: Date.now(),
+    })).toString('base64');
+
+    const authUrl = new URL(config.authUrl);
+    authUrl.searchParams.append('client_id', config.clientId);
+    authUrl.searchParams.append('redirect_uri', config.redirectUri);
+    authUrl.searchParams.append('scope', config.scope);
+    authUrl.searchParams.append('response_type', 'code');
+    authUrl.searchParams.append('state', state);
+
+    res.json({ authUrl: authUrl.toString() });
+  });
+
+  // Get creator profile by username
+  app.get("/api/creators/:username", async (req, res) => {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.username, req.params.username))
+        .limit(1);
+
+      if (!user) {
+        return res.status(404).json({ message: "Creator not found" });
+      }
+
+      if (user.role !== 'creator') {
+        return res.status(404).json({ message: "User is not a creator" });
+      }
+
+      const [profile] = await db
+        .select()
+        .from(creatorProfiles)
+        .where(eq(creatorProfiles.userId, user.id))
+        .limit(1);
+
+      if (!profile) {
+        return res.status(404).json({ message: "Creator profile not found" });
+      }
+
+      const creatorData = {
+        username: user.username,
+        displayName: user.displayName,
+        bio: user.bio,
+        avatar: user.avatar,
+        ...profile,
+      };
+
+      res.json(creatorData);
+    } catch (error) {
+      console.error("Error fetching creator profile:", error);
+      res.status(500).json({ message: "Failed to fetch creator profile" });
+    }
+  });
+
+  // List all creators
+  app.get("/api/creators", async (req, res) => {
+    try {
+      const creators = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          bio: users.bio,
+          avatar: users.avatar,
+        })
+        .from(users)
+        .where(eq(users.role, 'creator'));
+
+      res.json(creators);
+    } catch (error) {
+      console.error("Error fetching creators:", error);
+      res.status(500).json({ message: "Failed to fetch creators" });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

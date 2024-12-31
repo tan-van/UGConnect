@@ -15,8 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Instagram, Youtube, Twitter, Hash, BadgeCheck } from "lucide-react";
+import { Instagram, Youtube, Twitter, Hash, BadgeCheck, Link as LinkIcon } from "lucide-react";
 import { format } from "date-fns";
+import { SiInstagram, SiYoutube, SiTwitter, SiTiktok } from "react-icons/si";
 
 interface VerificationStatus {
   verified: boolean;
@@ -50,6 +51,20 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 interface CreatorProfileEditorProps {
   initialData?: Partial<ProfileFormValues>;
 }
+
+const connectPlatform = async (platform: string) => {
+  const response = await fetch(`/api/connect/${platform}`, {
+    method: 'GET',
+    credentials: 'include'
+  });
+
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+
+  const { authUrl } = await response.json();
+  window.location.href = authUrl;
+};
 
 export default function CreatorProfileEditor({ initialData }: CreatorProfileEditorProps) {
   const { toast } = useToast();
@@ -132,6 +147,17 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
     },
   });
 
+  const connectMutation = useMutation({
+    mutationFn: connectPlatform,
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   const renderVerificationBadge = (platform: keyof VerificationStatusResponse) => {
     if (!verificationStatus?.[platform]) return null;
 
@@ -162,6 +188,25 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
     );
   };
 
+  const renderConnectButton = (platform: keyof VerificationStatusResponse) => {
+    const isVerified = verificationStatus?.[platform]?.verified;
+    if (isVerified) return null;
+
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="ml-2"
+        onClick={() => connectMutation.mutate(platform)}
+        disabled={connectMutation.isPending}
+      >
+        <LinkIcon className="h-4 w-4 mr-2" />
+        Connect {platform}
+      </Button>
+    );
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit((data) => updateProfileMutation.mutate(data))} className="space-y-6">
@@ -172,12 +217,13 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
-                  <Instagram className="h-4 w-4 text-pink-500" />
+                  <SiInstagram className="h-4 w-4 text-pink-500" />
                   Instagram Handle
                   {renderVerificationBadge('instagram')}
+                  {renderConnectButton('instagram')}
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="@username" {...field} />
+                  <Input placeholder="@username" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -190,12 +236,13 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
-                  <Youtube className="h-4 w-4 text-red-500" />
+                  <SiYoutube className="h-4 w-4 text-red-500" />
                   YouTube Channel
                   {renderVerificationBadge('youtube')}
+                  {renderConnectButton('youtube')}
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="channel-name" {...field} />
+                  <Input placeholder="channel-name" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -208,12 +255,13 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
-                  <Twitter className="h-4 w-4 text-blue-500" />
+                  <SiTwitter className="h-4 w-4 text-blue-500" />
                   Twitter Handle
                   {renderVerificationBadge('twitter')}
+                  {renderConnectButton('twitter')}
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="@username" {...field} />
+                  <Input placeholder="@username" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -226,12 +274,13 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
-                  <Hash className="h-4 w-4" />
+                  <SiTiktok className="h-4 w-4" />
                   TikTok Handle
                   {renderVerificationBadge('tiktok')}
+                  {renderConnectButton('tiktok')}
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="@username" {...field} />
+                  <Input placeholder="@username" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

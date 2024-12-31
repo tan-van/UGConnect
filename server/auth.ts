@@ -28,23 +28,40 @@ const crypto = {
   },
 };
 
+// Extend express user object with our schema
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      username: string;
+      email: string;
+      role: 'employer' | 'seeker';
+      companyName: string | null;
+      bio: string | null;
+      createdAt: Date;
+    }
+  }
+}
+
 export function setupAuth(app: Express) {
   const MemoryStore = createMemoryStore(session);
   const sessionSettings: session.SessionOptions = {
     secret: process.env.REPL_ID || "job-board-secret",
     resave: false,
     saveUninitialized: false,
-    cookie: {},
+    cookie: {
+      secure: app.get("env") === "production",
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    },
     store: new MemoryStore({
-      checkPeriod: 86400000,
+      checkPeriod: 86400000, // prune expired entries every 24h
     }),
   };
 
   if (app.get("env") === "production") {
     app.set("trust proxy", 1);
-    sessionSettings.cookie = {
-      secure: true,
-    };
   }
 
   app.use(session(sessionSettings));
@@ -61,11 +78,11 @@ export function setupAuth(app: Express) {
           .limit(1);
 
         if (!user) {
-          return done(null, false, { message: "Incorrect username." });
+          return done(null, false, { message: "Invalid username or password" });
         }
         const isMatch = await crypto.compare(password, user.password);
         if (!isMatch) {
-          return done(null, false, { message: "Incorrect password." });
+          return done(null, false, { message: "Invalid username or password" });
         }
         return done(null, user);
       } catch (err) {
@@ -91,26 +108,60 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/register", async (req, res, next) => {
+  app.post("/api/register", async (req, res) => {
     try {
       const { username, password, email, role, companyName } = req.body;
 
+      // Validate required fields
       if (!username || !password || !email || !role) {
-        return res.status(400).send("Missing required fields");
+        return res.status(400).json({ message: "Missing required fields" });
       }
 
-      if (role === 'employer' && !companyName) {
-        return res.status(400).send("Company name is required for employers");
+      // Validate username length
+      if (username.length < 3) {
+        return res.status(400).json({ message: "Username must be at least 3 characters" });
       }
 
-      const [existingUser] = await db
+      // Validate password length
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      // Validate role
+      if (!['employer', 'seeker'].includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+
+      // Validate company name for employers
+      if (role === 'employer' && !companyName?.trim()) {
+        return res.status(400).json({ message: "Company name is required for employers" });
+      }
+
+      // Check for existing username or email
+      const existingUser = await db
         .select()
         .from(users)
         .where(eq(users.username, username))
         .limit(1);
 
-      if (existingUser) {
-        return res.status(400).send("Username already exists");
+      if (existingUser.length > 0) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const existingEmail = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      if (existingEmail.length > 0) {
+        return res.status(400).json({ message: "Email already exists" });
       }
 
       const hashedPassword = await crypto.hash(password);
@@ -128,7 +179,7 @@ export function setupAuth(app: Express) {
 
       req.login(newUser, (err) => {
         if (err) {
-          return next(err);
+          return res.status(500).json({ message: "Error during login after registration" });
         }
         return res.json({
           message: "Registration successful",
@@ -137,31 +188,29 @@ export function setupAuth(app: Express) {
       });
     } catch (error: any) {
       console.error('Registration error:', error);
-      if (error.code === '23505') { // Unique constraint violation
-        return res.status(400).send("Username or email already exists");
-      }
-      next(error);
+      return res.status(500).json({ message: "Server error during registration" });
     }
   });
 
   app.post("/api/login", (req, res, next) => {
     const { username, password } = req.body;
+
     if (!username || !password) {
-      return res.status(400).send("Missing username or password");
+      return res.status(400).json({ message: "Missing username or password" });
     }
 
     passport.authenticate("local", (err: any, user: Express.User, info: IVerifyOptions) => {
       if (err) {
-        return next(err);
+        return res.status(500).json({ message: "Internal server error" });
       }
 
       if (!user) {
-        return res.status(400).send(info.message ?? "Login failed");
+        return res.status(400).json({ message: info.message || "Login failed" });
       }
 
       req.logIn(user, (err) => {
         if (err) {
-          return next(err);
+          return res.status(500).json({ message: "Error during login" });
         }
 
         return res.json({
@@ -175,9 +224,8 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
-        return res.status(500).send("Logout failed");
+        return res.status(500).json({ message: "Error during logout" });
       }
-
       res.json({ message: "Logout successful" });
     });
   });
@@ -186,7 +234,6 @@ export function setupAuth(app: Express) {
     if (req.isAuthenticated()) {
       return res.json(req.user);
     }
-
-    res.status(401).send("Not logged in");
+    res.status(401).json({ message: "Not authenticated" });
   });
 }

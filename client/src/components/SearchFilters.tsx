@@ -38,7 +38,7 @@ export default function SearchFilters({ onFilter }: SearchFiltersProps) {
     defaultValues: {
       search: "",
       location: "",
-      type: "",
+      type: "all",
       remote: false,
     },
   });
@@ -86,7 +86,7 @@ export default function SearchFilters({ onFilter }: SearchFiltersProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="full-time">Full-time</SelectItem>
                     <SelectItem value="part-time">Part-time</SelectItem>
                     <SelectItem value="contract">Contract</SelectItem>

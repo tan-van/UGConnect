@@ -1,21 +1,27 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   BadgeCheck,
   DollarSign,
   Clock,
   Twitter
 } from "lucide-react";
-import { 
-  SiInstagram, 
+import {
+  SiInstagram,
   SiYoutube,
-  SiTiktok 
+  SiTiktok
 } from "react-icons/si";
+import { useUser } from "@/hooks/use-user";
+import ReviewsList from "@/components/ReviewsList";
+import ReviewForm from "@/components/ReviewForm";
+import { Dialog } from "@/components/ui/dialog";
 
 interface CreatorProfileData {
+  id: number; // Added id field
   username: string;
   displayName?: string;
   bio?: string;
@@ -45,6 +51,9 @@ interface CreatorProfileData {
 
 export default function CreatorProfile() {
   const { username } = useParams();
+  const { user } = useUser();
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
   const { data: profile, isLoading } = useQuery<CreatorProfileData>({
     queryKey: [`/api/creators/${username}`],
   });
@@ -76,6 +85,7 @@ export default function CreatorProfile() {
 
   const hasContentCategories = profile.contentCategories && profile.contentCategories.length > 0;
   const hasShowcaseContent = profile.showcaseContent && profile.showcaseContent.length > 0;
+  const isClient = user?.role === 'client';
 
   return (
     <div className="space-y-8">
@@ -252,6 +262,21 @@ export default function CreatorProfile() {
           </CardContent>
         </Card>
       )}
+
+      {/* Reviews Section */}
+      <ReviewsList
+        creatorId={profile.id} // Assuming profile.id exists
+        onReviewClick={() => setShowReviewForm(true)}
+        showReviewButton={isClient}
+      />
+
+      {/* Review Form Dialog */}
+      <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
+        <ReviewForm
+          creatorId={profile.id} // Assuming profile.id exists
+          onSuccess={() => setShowReviewForm(false)}
+        />
+      </Dialog>
     </div>
   );
 }

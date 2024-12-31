@@ -58,17 +58,31 @@ export default function CreatorProfile() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: profile, isLoading } = useQuery<CreatorProfileData>({
+  const { data: profile, isLoading, error } = useQuery<CreatorProfileData>({
     queryKey: ['creators', username],
     queryFn: async () => {
+      if (!username) return null;
       const response = await fetch(`/api/creators/${username}`);
       if (!response.ok) {
         throw new Error('Failed to fetch profile');
       }
-      return response.json();
+      const data = await response.json();
+      return data;
     },
     enabled: !!username,
   });
+
+  if (error) {
+    console.error('Profile fetch error:', error);
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold">Error loading profile</h2>
+        <p className="text-muted-foreground mt-2">
+          {error instanceof Error ? error.message : 'Failed to load profile'}
+        </p>
+      </div>
+    );
+  }
 
   const handleReviewSuccess = () => {
     setDialogOpen(false);

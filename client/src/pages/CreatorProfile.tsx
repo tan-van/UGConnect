@@ -296,7 +296,7 @@ export default function CreatorProfile() {
             </Dialog>
           )}
         </div>
-        <ReviewsList creatorId={profile.id} />
+        <ReviewsList creatorId={4} />
       </div>
     </div>
   );

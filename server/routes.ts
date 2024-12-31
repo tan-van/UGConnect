@@ -62,14 +62,35 @@ export function registerRoutes(app: Express): Server {
         .innerJoin(users, eq(jobs.clientId, users.id))
         .where(eq(jobs.status, 'open'));
 
+      // Only apply type filter if it's not 'all'
       if (type && type !== 'all') {
-        query = query.where(eq(jobs.type, type as string));
+        const jobType = type as string;
+        query = db.select({
+          id: jobs.id,
+          title: jobs.title,
+          description: jobs.description,
+          requirements: jobs.requirements,
+          budget: jobs.budget,
+          location: jobs.location,
+          remote: jobs.remote,
+          type: jobs.type,
+          status: jobs.status,
+          featured: jobs.featured,
+          createdAt: jobs.createdAt,
+          client: {
+            displayName: users.displayName,
+          },
+        })
+        .from(jobs)
+        .innerJoin(users, eq(jobs.clientId, users.id))
+        .where(eq(jobs.status, 'open'))
+        .where(eq(jobs.type, jobType));
       }
 
       // If no jobs exist yet, insert some placeholder data
       let jobsData = await query;
 
-      if (jobsData.length === 0) {
+      if (jobsData.length === 0 && (!type || type === 'all')) {
         // Insert some placeholder jobs
         const [client] = await db
           .select()

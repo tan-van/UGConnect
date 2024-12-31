@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import JobCard from "@/components/JobCard";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -25,6 +24,17 @@ export default function BrowseJobs() {
 
   const { data: jobs, isLoading } = useQuery<JobWithClient[]>({
     queryKey: ['/api/jobs', { type: jobType }],
+    queryFn: async ({ queryKey }) => {
+      const [_, params] = queryKey;
+      const searchParams = new URLSearchParams(params as Record<string, string>);
+      const response = await fetch(`/api/jobs?${searchParams}`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch jobs');
+      }
+      return response.json();
+    },
   });
 
   const filteredJobs = jobs?.filter(job => 

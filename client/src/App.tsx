@@ -51,12 +51,13 @@ function App() {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <Switch>
-          <Route path="/" component={user.role === 'creator' ? CreatorDashboard : ClientDashboard} />
+          <Route path="/" component={HomePage} />
           <Route path="/creators" component={BrowseCreators} />
           <Route path="/creators/:username" component={CreatorProfile} />
           <Route path="/jobs" component={BrowseJobs} />
           <Route path="/jobs/create" component={CreateJob} />
           <Route path="/client/dashboard" component={ClientDashboard} />
+          <Route path="/dashboard" component={user?.role === 'creator' ? CreatorDashboard : ClientDashboard} />
           <Route path="*" component={NotFound} />
         </Switch>
       </main>

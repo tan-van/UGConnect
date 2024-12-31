@@ -2,7 +2,8 @@ import { pgTable, text, serial, integer, boolean, timestamp, pgEnum } from "driz
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 
-export const userRoleEnum = pgEnum('user_role', ['employer', 'seeker']);
+// Create enum for user roles first
+export const userRoleEnum = pgEnum('user_role', ['creator', 'client']);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -10,68 +11,60 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   email: text("email").unique().notNull(),
   role: userRoleEnum("role").notNull(),
-  companyName: text("company_name"),
+  displayName: text("display_name"),
   bio: text("bio"),
+  avatar: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const jobs = pgTable("jobs", {
+export const creatorProfiles = pgTable("creator_profiles", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  employerId: integer("employer_id").references(() => users.id).notNull(),
-  location: text("location").notNull(),
-  salary: text("salary"),
-  type: text("type").notNull(), // full-time, part-time, contract
-  remote: boolean("remote").default(false),
-  requirements: text("requirements").notNull(),
-  featured: boolean("featured").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  // Social media handles
+  instagram: text("instagram"),
+  youtube: text("youtube"),
+  tiktok: text("tiktok"),
+  twitter: text("twitter"),
+  // Social stats
+  instagramFollowers: integer("instagram_followers"),
+  youtubeSubscribers: integer("youtube_subscribers"),
+  tiktokFollowers: integer("tiktok_followers"),
+  twitterFollowers: integer("twitter_followers"),
+  // Content metrics
+  averageViews: integer("average_views"),
+  engagementRate: text("engagement_rate"),
+  contentCategories: text("content_categories").array(),
+  // Portfolio
+  showcaseContent: text("showcase_content").array(),
+  // Rates and availability
+  ratePerPost: text("rate_per_post"),
+  availability: boolean("is_available").default(true),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
 });
 
-export const applications = pgTable("applications", {
-  id: serial("id").primaryKey(),
-  jobId: integer("job_id").references(() => jobs.id).notNull(),
-  seekerId: integer("seeker_id").references(() => users.id).notNull(),
-  coverLetter: text("cover_letter"),
-  status: text("status").notNull().default('pending'), // pending, accepted, rejected
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const jobsRelations = relations(jobs, ({ one, many }) => ({
-  employer: one(users, {
-    fields: [jobs.employerId],
-    references: [users.id],
+// Relations
+export const usersRelations = relations(users, ({ one }) => ({
+  profile: one(creatorProfiles, {
+    fields: [users.id],
+    references: [creatorProfiles.userId],
   }),
-  applications: many(applications),
 }));
 
-export const usersRelations = relations(users, ({ many }) => ({
-  postedJobs: many(jobs),
-  applications: many(applications),
-}));
-
-export const applicationsRelations = relations(applications, ({ one }) => ({
-  job: one(jobs, {
-    fields: [applications.jobId],
-    references: [jobs.id],
-  }),
-  seeker: one(users, {
-    fields: [applications.seekerId],
+export const creatorProfilesRelations = relations(creatorProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [creatorProfiles.userId],
     references: [users.id],
   }),
 }));
 
+// Schemas for validation
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
-export const insertJobSchema = createInsertSchema(jobs);
-export const selectJobSchema = createSelectSchema(jobs);
-export const insertApplicationSchema = createInsertSchema(applications);
-export const selectApplicationSchema = createSelectSchema(applications);
+export const insertCreatorProfileSchema = createInsertSchema(creatorProfiles);
+export const selectCreatorProfileSchema = createSelectSchema(creatorProfiles);
 
+// Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-export type Job = typeof jobs.$inferSelect;
-export type NewJob = typeof jobs.$inferInsert;
-export type Application = typeof applications.$inferSelect;
-export type NewApplication = typeof applications.$inferInsert;
+export type CreatorProfile = typeof creatorProfiles.$inferSelect;
+export type NewCreatorProfile = typeof creatorProfiles.$inferInsert;

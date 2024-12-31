@@ -5,10 +5,10 @@ import { useUser } from "@/hooks/use-user";
 
 // Page imports
 import AuthPage from "@/pages/AuthPage";
-import HomePage from "@/pages/HomePage";
-import JobListingPage from "@/pages/JobListingPage";
-import CreateJobPage from "@/pages/CreateJobPage";
-import ProfilePage from "@/pages/ProfilePage";
+import CreatorDashboard from "@/pages/CreatorDashboard";
+import CreatorProfile from "@/pages/CreatorProfile";
+import BrowseCreators from "@/pages/BrowseCreators";
+import ClientDashboard from "@/pages/ClientDashboard";
 
 // Components
 import Navbar from "@/components/Navbar";
@@ -33,13 +33,10 @@ function App() {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <Switch>
-          <Route path="/" component={HomePage} />
-          <Route path="/jobs/new" component={CreateJobPage} />
-          <Route path="/jobs/:id" component={JobListingPage} />
-          <Route path="/profile" component={ProfilePage} />
-          <Route>
-            <NotFound />
-          </Route>
+          <Route path="/" component={user.role === 'creator' ? CreatorDashboard : ClientDashboard} />
+          <Route path="/creators" component={BrowseCreators} />
+          <Route path="/creators/:username" component={CreatorProfile} />
+          <Route component={NotFound} />
         </Switch>
       </main>
     </div>

@@ -120,7 +120,6 @@ export default function CreatorProfile() {
           >
             Set Up Profile
           </button>
-          </Link>
         </div>
       );
     }

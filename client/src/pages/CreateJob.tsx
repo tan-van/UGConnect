@@ -47,6 +47,11 @@ export default function CreateJob() {
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
+      title: "",
+      description: "",
+      requirements: "",
+      budget: "",
+      location: "",
       remote: false,
       type: "one-time",
     },
@@ -92,10 +97,11 @@ export default function CreateJob() {
     createJobMutation.mutate(values);
   }
 
+  const formValues = form.getValues();
   const previewJob = {
-    ...form.getValues(),
+    ...formValues,
     id: 0,
-    requirements: form.getValues().requirements.split("\n").filter(Boolean),
+    requirements: formValues.requirements?.split("\n").filter(Boolean) || [],
     featured: false,
     status: "open" as const,
     createdAt: new Date(),

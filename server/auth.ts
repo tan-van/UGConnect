@@ -28,21 +28,6 @@ const crypto = {
   },
 };
 
-// Extend express user object with our schema
-declare global {
-  namespace Express {
-    interface User {
-      id: number;
-      username: string;
-      email: string;
-      role: 'employer' | 'seeker';
-      companyName: string | null;
-      bio: string | null;
-      createdAt: Date;
-    }
-  }
-}
-
 export function setupAuth(app: Express) {
   const MemoryStore = createMemoryStore(session);
   const sessionSettings: session.SessionOptions = {
@@ -110,8 +95,12 @@ export function setupAuth(app: Express) {
     try {
       const { username, password, email, role, companyName } = req.body;
 
-      if (!username || !password || !email || !role || (role === 'employer' && !companyName)) {
+      if (!username || !password || !email || !role) {
         return res.status(400).send("Missing required fields");
+      }
+
+      if (role === 'employer' && !companyName) {
+        return res.status(400).send("Company name is required for employers");
       }
 
       const [existingUser] = await db
@@ -133,7 +122,7 @@ export function setupAuth(app: Express) {
           password: hashedPassword,
           email,
           role,
-          companyName,
+          companyName: role === 'employer' ? companyName : null,
         })
         .returning();
 
@@ -146,7 +135,11 @@ export function setupAuth(app: Express) {
           user: newUser,
         });
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).send("Username or email already exists");
+      }
       next(error);
     }
   });

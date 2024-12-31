@@ -38,15 +38,28 @@ const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["employer", "seeker"]),
-  companyName: z.string().optional().or(z.literal('')).transform(val => val || null),
+  role: z.enum(["employer", "seeker"], {
+    required_error: "Please select a role",
+  }),
+  companyName: z.string().optional(),
+}).refine((data) => {
+  if (data.role === "employer") {
+    return !!data.companyName;
+  }
+  return true;
+}, {
+  message: "Company name is required for employers",
+  path: ["companyName"],
 });
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const { login, register } = useUser();
   const [activeTab, setActiveTab] = useState("login");
 
-  const loginForm = useForm<z.infer<typeof loginSchema>>({
+  const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
@@ -54,7 +67,7 @@ export default function AuthPage() {
     },
   });
 
-  const registerForm = useForm<z.infer<typeof registerSchema>>({
+  const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
@@ -64,17 +77,6 @@ export default function AuthPage() {
       companyName: "",
     },
   });
-
-  const onRegisterSubmit = async (data: z.infer<typeof registerSchema>) => {
-    if (data.role === "employer" && !data.companyName) {
-      registerForm.setError("companyName", {
-        type: "manual",
-        message: "Company name is required for employers"
-      });
-      return;
-    }
-    await register(data);
-  };
 
   return (
     <div className="container flex items-center justify-center min-h-screen">
@@ -128,7 +130,7 @@ export default function AuthPage() {
             </TabsContent>
             <TabsContent value="register">
               <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                <form onSubmit={registerForm.handleSubmit((data) => register(data))} className="space-y-4">
                   <FormField
                     control={registerForm.control}
                     name="username"
@@ -197,7 +199,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Company Name</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} value={field.value || ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

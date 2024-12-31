@@ -34,6 +34,16 @@ const platformConfigs = {
   },
 };
 
+async function hash(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString('hex');
+    crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(derivedKey.toString('hex') + '.' + salt);
+    });
+  });
+}
+
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
@@ -90,9 +100,9 @@ export function registerRoutes(app: Express): Server {
           const sampleUsers = [
             {
               username: "techbrand",
-              password: await crypto.hash("password123"),
+              password: await hash("password123"),
               email: "tech@brand.com",
-              role: "client",
+              role: 'client' as const,
               displayName: "Tech Brand Inc.",
               bio: "Leading tech company looking for creative content creators",
               completedOnboarding: true,
@@ -100,9 +110,9 @@ export function registerRoutes(app: Express): Server {
             },
             {
               username: "beautycorp",
-              password: await crypto.hash("password123"),
+              password: await hash("password123"),
               email: "beauty@corp.com",
-              role: "client",
+              role: 'client' as const,
               displayName: "Beauty Corp",
               bio: "Premium beauty brand seeking influencers",
               completedOnboarding: true,
@@ -110,9 +120,9 @@ export function registerRoutes(app: Express): Server {
             },
             {
               username: "gamingstar",
-              password: await crypto.hash("password123"),
+              password: await hash("password123"),
               email: "creator@gaming.com",
-              role: "creator",
+              role: 'creator' as const,
               displayName: "Gaming Star",
               bio: "Professional gaming content creator with 500K+ followers",
               completedOnboarding: true,
@@ -120,9 +130,9 @@ export function registerRoutes(app: Express): Server {
             },
             {
               username: "beautyinfluencer",
-              password: await crypto.hash("password123"),
+              password: await hash("password123"),
               email: "creator@beauty.com",
-              role: "creator",
+              role: 'creator' as const,
               displayName: "Beauty Guru",
               bio: "Beauty and lifestyle content creator, 1M+ followers across platforms",
               completedOnboarding: true,
@@ -179,6 +189,8 @@ export function registerRoutes(app: Express): Server {
               clientId: client.id,
               status: 'open' as const,
               featured: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
             },
             {
               title: "Beauty Product Review Creator Needed",
@@ -191,6 +203,8 @@ export function registerRoutes(app: Express): Server {
               clientId: client.id,
               status: 'open' as const,
               featured: false,
+              createdAt: new Date(),
+              updatedAt: new Date(),
             },
             {
               title: "Tech Review Content Partnership",
@@ -203,6 +217,8 @@ export function registerRoutes(app: Express): Server {
               clientId: client.id,
               status: 'open' as const,
               featured: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
             }
           ]);
 
@@ -237,6 +253,8 @@ export function registerRoutes(app: Express): Server {
           ...req.body,
           clientId: req.user.id,
           status: 'open',
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
         .returning();
 
@@ -516,7 +534,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // List all creators
+  // List all creators with their profiles
   app.get("/api/creators", async (req, res) => {
     try {
       const creators = await db
@@ -526,8 +544,24 @@ export function registerRoutes(app: Express): Server {
           displayName: users.displayName,
           bio: users.bio,
           avatar: users.avatar,
+          profile: {
+            instagram: creatorProfiles.instagram,
+            youtube: creatorProfiles.youtube,
+            tiktok: creatorProfiles.tiktok,
+            twitter: creatorProfiles.twitter,
+            instagramFollowers: creatorProfiles.instagramFollowers,
+            youtubeSubscribers: creatorProfiles.youtubeSubscribers,
+            tiktokFollowers: creatorProfiles.tiktokFollowers,
+            twitterFollowers: creatorProfiles.twitterFollowers,
+            averageViews: creatorProfiles.averageViews,
+            engagementRate: creatorProfiles.engagementRate,
+            contentCategories: creatorProfiles.contentCategories,
+            ratePerPost: creatorProfiles.ratePerPost,
+            availability: creatorProfiles.availability,
+          }
         })
         .from(users)
+        .leftJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
 
       res.json(creators);

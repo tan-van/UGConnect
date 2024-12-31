@@ -8,6 +8,35 @@ import OnboardingTutorial from "@/components/OnboardingTutorial";
 import CreatorProfileEditor from "@/components/CreatorProfileEditor";
 import { Instagram, Youtube, Twitter, BadgeCheck } from "lucide-react";
 
+interface CreatorProfile {
+  userId: number;
+  instagram?: string | null;
+  youtube?: string | null;
+  tiktok?: string | null;
+  twitter?: string | null;
+  instagramVerified: boolean;
+  youtubeVerified: boolean;
+  tiktokVerified: boolean;
+  twitterVerified: boolean;
+  instagramVerifiedAt?: string | null;
+  youtubeVerifiedAt?: string | null;
+  tiktokVerifiedAt?: string | null;
+  twitterVerifiedAt?: string | null;
+  instagramFollowers?: number | null;
+  youtubeSubscribers?: number | null;
+  tiktokFollowers?: number | null;
+  twitterFollowers?: number | null;
+  averageViews?: number | null;
+  engagementRate?: string | null;
+  contentCategories?: string[] | null;
+  showcaseContent?: Array<{
+    platform: string;
+    url: string;
+  }> | null;
+  ratePerPost?: string | null;
+  availability: boolean;
+}
+
 interface VerificationStatus {
   verified: boolean;
   verifiedAt: string | null;
@@ -24,7 +53,7 @@ export default function CreatorDashboard() {
   const { user } = useUser();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const { data: profile, isLoading: isProfileLoading } = useQuery({
+  const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],
   });
 

@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Instagram, Youtube, Twitter, Hash, BadgeCheck, Link as LinkIcon } from "lucide-react";
+import { BadgeCheck, Link as LinkIcon, Twitter } from "lucide-react";
 import { format } from "date-fns";
-import { SiInstagram, SiYoutube, SiTwitter, SiTiktok } from "react-icons/si";
+import { SiInstagram, SiYoutube, SiTiktok } from "react-icons/si";
 
 interface VerificationStatus {
   verified: boolean;
@@ -32,17 +32,17 @@ interface VerificationStatusResponse {
 }
 
 const profileSchema = z.object({
-  instagram: z.string().optional().nullable(),
-  youtube: z.string().optional().nullable(),
-  tiktok: z.string().optional().nullable(),
-  twitter: z.string().optional().nullable(),
-  instagramFollowers: z.coerce.number().optional().nullable(),
-  youtubeSubscribers: z.coerce.number().optional().nullable(),
-  tiktokFollowers: z.coerce.number().optional().nullable(),
-  twitterFollowers: z.coerce.number().optional().nullable(),
-  averageViews: z.coerce.number().optional().nullable(),
-  engagementRate: z.string().optional().nullable(),
-  ratePerPost: z.string().optional().nullable(),
+  instagram: z.string().optional(),
+  youtube: z.string().optional(),
+  tiktok: z.string().optional(),
+  twitter: z.string().optional(),
+  instagramFollowers: z.coerce.number().optional(),
+  youtubeSubscribers: z.coerce.number().optional(),
+  tiktokFollowers: z.coerce.number().optional(),
+  twitterFollowers: z.coerce.number().optional(),
+  averageViews: z.coerce.number().optional(),
+  engagementRate: z.string().optional(),
+  ratePerPost: z.string().optional(),
   availability: z.boolean().default(true),
 });
 
@@ -72,19 +72,18 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      instagram: "",
-      youtube: "",
-      tiktok: "",
-      twitter: "",
-      instagramFollowers: null,
-      youtubeSubscribers: null,
-      tiktokFollowers: null,
-      twitterFollowers: null,
-      averageViews: null,
-      engagementRate: "",
-      ratePerPost: "",
-      availability: true,
-      ...initialData,
+      instagram: initialData?.instagram || "",
+      youtube: initialData?.youtube || "",
+      tiktok: initialData?.tiktok || "",
+      twitter: initialData?.twitter || "",
+      instagramFollowers: initialData?.instagramFollowers || undefined,
+      youtubeSubscribers: initialData?.youtubeSubscribers || undefined,
+      tiktokFollowers: initialData?.tiktokFollowers || undefined,
+      twitterFollowers: initialData?.twitterFollowers || undefined,
+      averageViews: initialData?.averageViews || undefined,
+      engagementRate: initialData?.engagementRate || "",
+      ratePerPost: initialData?.ratePerPost || "",
+      availability: initialData?.availability ?? true,
     },
   });
 
@@ -255,7 +254,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
-                  <SiTwitter className="h-4 w-4 text-blue-500" />
+                  <Twitter className="h-4 w-4 text-blue-500" />
                   Twitter Handle
                   {renderVerificationBadge('twitter')}
                   {renderConnectButton('twitter')}
@@ -292,7 +291,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
           <FormField
             control={form.control}
             name="instagramFollowers"
-            render={({ field }) => (
+            render={({ field: { value, onChange, ...field } }) => (
               <FormItem>
                 <FormLabel>Instagram Followers</FormLabel>
                 <FormControl>
@@ -300,6 +299,8 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -310,7 +311,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
           <FormField
             control={form.control}
             name="youtubeSubscribers"
-            render={({ field }) => (
+            render={({ field: { value, onChange, ...field } }) => (
               <FormItem>
                 <FormLabel>YouTube Subscribers</FormLabel>
                 <FormControl>
@@ -318,6 +319,8 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -328,7 +331,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
           <FormField
             control={form.control}
             name="twitterFollowers"
-            render={({ field }) => (
+            render={({ field: { value, onChange, ...field } }) => (
               <FormItem>
                 <FormLabel>Twitter Followers</FormLabel>
                 <FormControl>
@@ -336,6 +339,8 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -346,7 +351,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
           <FormField
             control={form.control}
             name="tiktokFollowers"
-            render={({ field }) => (
+            render={({ field: { value, onChange, ...field } }) => (
               <FormItem>
                 <FormLabel>TikTok Followers</FormLabel>
                 <FormControl>
@@ -354,6 +359,8 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -366,7 +373,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
           <FormField
             control={form.control}
             name="averageViews"
-            render={({ field }) => (
+            render={({ field: { value, onChange, ...field } }) => (
               <FormItem>
                 <FormLabel>Average Views per Post</FormLabel>
                 <FormControl>
@@ -374,6 +381,8 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                     type="number" 
                     placeholder="0"
                     {...field}
+                    value={value || ''}
+                    onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -388,7 +397,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
               <FormItem>
                 <FormLabel>Rate per Post</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. $500-1000" {...field} />
+                  <Input placeholder="e.g. $500-1000" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

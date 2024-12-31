@@ -29,28 +29,28 @@ export default function ShareButtons({ job, className }: ShareButtonsProps) {
         variant="outline"
         size="sm"
         onClick={() => handleShare('twitter')}
-        className="hover:text-[#1DA1F2]"
+        className="flex-1 hover:text-[#1DA1F2]"
       >
         <Twitter className="h-4 w-4 mr-2" />
-        Twitter
+        Share
       </Button>
       <Button
         variant="outline"
         size="sm"
         onClick={() => handleShare('linkedin')}
-        className="hover:text-[#0A66C2]"
+        className="flex-1 hover:text-[#0A66C2]"
       >
         <Linkedin className="h-4 w-4 mr-2" />
-        LinkedIn
+        Share
       </Button>
       <Button
         variant="outline"
         size="sm"
         onClick={() => handleShare('facebook')}
-        className="hover:text-[#1877F2]"
+        className="flex-1 hover:text-[#1877F2]"
       >
         <Facebook className="h-4 w-4 mr-2" />
-        Facebook
+        Share
       </Button>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { type Job } from "@db/schema";
 import { Building2, MapPin, Timer } from "lucide-react";
 import { Link } from "wouter";
@@ -59,7 +60,7 @@ export default function JobCard({ job, onApply }: JobCardProps) {
             </div>
           )}
 
-          <div className="flex flex-col gap-4">
+          <div className="space-y-3 pt-2">
             <div className="flex gap-2">
               <Link href={`/jobs/${job.id}`} className="flex-1">
                 <Button variant="secondary" className="w-full">
@@ -72,7 +73,8 @@ export default function JobCard({ job, onApply }: JobCardProps) {
                 </Button>
               )}
             </div>
-            <ShareButtons job={job} />
+            <Separator />
+            <ShareButtons job={job} className="w-full" />
           </div>
         </div>
       </CardContent>

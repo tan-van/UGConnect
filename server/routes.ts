@@ -681,7 +681,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const { creatorId, jobId, rating, review } = req.body;
+      const { creatorId, rating, review } = req.body;
 
       if (!creatorId || !rating || !review) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -696,7 +696,10 @@ export function registerRoutes(app: Express): Server {
       const [creator] = await db
         .select()
         .from(users)
-        .where(and(eq(users.id, creatorId), eq(users.role, 'creator')))
+        .where(and(
+          eq(users.id, parseInt(creatorId.toString())),
+          eq(users.role, 'creator')
+        ))
         .limit(1);
 
       if (!creator) {
@@ -707,9 +710,8 @@ export function registerRoutes(app: Express): Server {
       const [newReview] = await db
         .insert(reviews)
         .values({
-          creatorId,
+          creatorId: parseInt(creatorId.toString()),
           clientId: req.user.id,
-          jobId: jobId || null,
           rating,
           review,
           helpfulVotes: 0,

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { jobs, applications, users } from "@db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -41,6 +41,26 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/jobs/:id", async (req, res) => {
+    try {
+      const [job] = await db.query.jobs.findMany({
+        where: eq(jobs.id, parseInt(req.params.id)),
+        with: {
+          employer: true
+        },
+        limit: 1
+      });
+
+      if (!job) {
+        return res.status(404).send("Job not found");
+      }
+
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch job" });
+    }
+  });
+
   // Applications routes
   app.post("/api/jobs/:jobId/apply", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== 'seeker') {
@@ -67,17 +87,21 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      let query;
+      let userApplications;
+
       if (req.user.role === 'employer') {
-        query = db.query.applications.findMany({
-          where: eq(applications.jobId, req.query.jobId as string),
+        // For employers, get applications for their jobs
+        userApplications = await db.query.applications.findMany({
           with: {
             seeker: true,
             job: true
-          }
+          },
+          where: (applications, { eq }) => 
+            eq(applications.jobId, req.query.jobId ? parseInt(req.query.jobId as string) : applications.jobId)
         });
       } else {
-        query = db.query.applications.findMany({
+        // For job seekers, get their applications
+        userApplications = await db.query.applications.findMany({
           where: eq(applications.seekerId, req.user.id),
           with: {
             job: {
@@ -88,7 +112,7 @@ export function registerRoutes(app: Express): Server {
           }
         });
       }
-      const userApplications = await query;
+
       res.json(userApplications);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch applications" });

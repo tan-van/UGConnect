@@ -9,6 +9,11 @@ export const queryClient = new QueryClient({
         });
 
         if (!res.ok) {
+          if (res.status === 401) {
+            // Handle unauthorized specifically for auth flows
+            return null;
+          }
+
           if (res.status >= 500) {
             throw new Error(`${res.status}: ${res.statusText}`);
           }

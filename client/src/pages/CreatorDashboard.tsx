@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from "react";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import CreatorProfileEditor from "@/components/CreatorProfileEditor";
 import { Instagram, Youtube, Twitter, BadgeCheck } from "lucide-react";
@@ -51,7 +50,6 @@ interface VerificationStatusResponse {
 
 export default function CreatorDashboard() {
   const { user } = useUser();
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],
@@ -60,12 +58,6 @@ export default function CreatorDashboard() {
   const { data: verificationStatus, isLoading: isVerificationLoading } = useQuery<VerificationStatusResponse>({
     queryKey: ['/api/profile/verification-status'],
   });
-
-  useEffect(() => {
-    if (user && !user.completedOnboarding) {
-      setShowOnboarding(true);
-    }
-  }, [user]);
 
   const isLoading = isProfileLoading || isVerificationLoading;
 
@@ -85,11 +77,13 @@ export default function CreatorDashboard() {
 
   return (
     <>
-      <OnboardingTutorial
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        userRole="creator"
-      />
+      {user && !user.completedOnboarding && (
+        <OnboardingTutorial
+          isOpen={true}
+          onClose={() => {}}
+          userRole="creator"
+        />
+      )}
 
       <div className="space-y-8">
         <div>

@@ -2,7 +2,7 @@ import { useUser } from "@/hooks/use-user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import JobCard from "@/components/JobCard";
@@ -17,13 +17,6 @@ interface JobWithClient extends Job {
 
 export default function ClientDashboard() {
   const { user } = useUser();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  useEffect(() => {
-    if (user && !user.completedOnboarding) {
-      setShowOnboarding(true);
-    }
-  }, [user]);
 
   const { data: jobs, isLoading } = useQuery<JobWithClient[]>({
     queryKey: ['/api/jobs', { clientId: user?.id }],
@@ -42,11 +35,13 @@ export default function ClientDashboard() {
 
   return (
     <>
-      <OnboardingTutorial
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        userRole="client"
-      />
+      {user && !user.completedOnboarding && (
+        <OnboardingTutorial
+          isOpen={true}
+          onClose={() => {}}
+          userRole="client"
+        />
+      )}
 
       <div className="space-y-6">
         <div className="flex justify-between items-center">

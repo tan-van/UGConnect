@@ -156,7 +156,7 @@ export function registerRoutes(app: Express): Server {
             twitterFollowers: Math.floor(Math.random() * 300000) + 50000,
             averageViews: Math.floor(Math.random() * 100000) + 10000,
             engagementRate: (Math.random() * 5 + 1).toFixed(2) + "%",
-            contentCategories: user.username.includes('gaming') 
+            contentCategories: user.username.includes('gaming')
               ? ['Gaming', 'Entertainment', 'Technology']
               : ['Beauty', 'Lifestyle', 'Fashion'],
             showcaseContent: [
@@ -537,7 +537,7 @@ export function registerRoutes(app: Express): Server {
   // List all creators with their profiles
   app.get("/api/creators", async (req, res) => {
     try {
-      const creators = await db
+      let creators = await db
         .select({
           id: users.id,
           username: users.username,
@@ -564,12 +564,112 @@ export function registerRoutes(app: Express): Server {
         .leftJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
 
+      // If no creators exist, create sample data
+      if (creators.length === 0) {
+        const sampleUsers = [
+          {
+            username: "gamingstar",
+            password: await hash("password123"),
+            email: "creator@gaming.com",
+            role: 'creator' as const,
+            displayName: "Gaming Star",
+            bio: "Professional gaming content creator with 500K+ followers",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          },
+          {
+            username: "beautyinfluencer",
+            password: await hash("password123"),
+            email: "creator@beauty.com",
+            role: 'creator' as const,
+            displayName: "Beauty Guru",
+            bio: "Beauty and lifestyle content creator, 1M+ followers across platforms",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          },
+          {
+            username: "techreviewer",
+            password: await hash("password123"),
+            email: "creator@tech.com",
+            role: 'creator' as const,
+            displayName: "Tech Reviewer",
+            bio: "In-depth tech reviews and unboxings, 750K+ subscribers",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          },
+        ];
+
+        const insertedUsers = await db.insert(users).values(sampleUsers).returning();
+
+        const creatorProfileData = insertedUsers.map(user => ({
+          userId: user.id,
+          instagram: `${user.username}`,
+          youtube: `${user.username}`,
+          tiktok: `${user.username}`,
+          twitter: `${user.username}`,
+          instagramFollowers: Math.floor(Math.random() * 500000) + 100000,
+          youtubeSubscribers: Math.floor(Math.random() * 1000000) + 50000,
+          tiktokFollowers: Math.floor(Math.random() * 800000) + 200000,
+          twitterFollowers: Math.floor(Math.random() * 300000) + 50000,
+          averageViews: Math.floor(Math.random() * 100000) + 10000,
+          engagementRate: (Math.random() * 5 + 1).toFixed(2) + "%",
+          contentCategories: user.username.includes('gaming')
+            ? ['Gaming', 'Entertainment', 'Technology']
+            : user.username.includes('beauty')
+            ? ['Beauty', 'Lifestyle', 'Fashion']
+            : ['Technology', 'Reviews', 'Education'],
+          showcaseContent: [
+            'https://example.com/content1',
+            'https://example.com/content2',
+            'https://example.com/content3',
+          ],
+          ratePerPost: user.username.includes('gaming')
+            ? "$1000-2000 per video"
+            : user.username.includes('beauty')
+            ? "$800-1500 per post"
+            : "$1500-2500 per review",
+          availability: true,
+          lastUpdated: new Date(),
+        }));
+
+        await db.insert(creatorProfiles).values(creatorProfileData);
+
+        // Fetch the newly created creators
+        creators = await db
+          .select({
+            id: users.id,
+            username: users.username,
+            displayName: users.displayName,
+            bio: users.bio,
+            avatar: users.avatar,
+            profile: {
+              instagram: creatorProfiles.instagram,
+              youtube: creatorProfiles.youtube,
+              tiktok: creatorProfiles.tiktok,
+              twitter: creatorProfiles.twitter,
+              instagramFollowers: creatorProfiles.instagramFollowers,
+              youtubeSubscribers: creatorProfiles.youtubeSubscribers,
+              tiktokFollowers: creatorProfiles.tiktokFollowers,
+              twitterFollowers: creatorProfiles.twitterFollowers,
+              averageViews: creatorProfiles.averageViews,
+              engagementRate: creatorProfiles.engagementRate,
+              contentCategories: creatorProfiles.contentCategories,
+              ratePerPost: creatorProfiles.ratePerPost,
+              availability: creatorProfiles.availability,
+            }
+          })
+          .from(users)
+          .leftJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
+          .where(eq(users.role, 'creator'));
+      }
+
       res.json(creators);
     } catch (error) {
       console.error("Error fetching creators:", error);
       res.status(500).json({ message: "Failed to fetch creators" });
     }
   });
+
 
 
   const httpServer = createServer(app);

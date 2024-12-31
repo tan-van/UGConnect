@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { BadgeCheck, Link as LinkIcon, Twitter } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
 import { format } from "date-fns";
 import { SiInstagram, SiYoutube, SiTiktok } from "react-icons/si";
 
@@ -53,20 +53,6 @@ interface CreatorProfileEditorProps {
   initialData?: Partial<ProfileFormValues>;
 }
 
-const connectPlatform = async (platform: string) => {
-  const response = await fetch(`/api/connect/${platform}`, {
-    method: 'GET',
-    credentials: 'include'
-  });
-
-  if (!response.ok) {
-    throw new Error(await response.text());
-  }
-
-  const { authUrl } = await response.json();
-  window.location.href = authUrl;
-};
-
 export default function CreatorProfileEditor({ initialData }: CreatorProfileEditorProps) {
   const { toast } = useToast();
 
@@ -102,8 +88,7 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
       });
 
       if (!res.ok) {
-        const error = await res.text();
-        throw new Error(error);
+        throw new Error(await res.text());
       }
       return res.json();
     },
@@ -147,17 +132,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
     },
   });
 
-  const connectMutation = useMutation({
-    mutationFn: connectPlatform,
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
   const renderVerificationBadge = (platform: keyof VerificationStatusResponse) => {
     if (!verificationStatus?.[platform]) return null;
 
@@ -188,25 +162,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
     );
   };
 
-  const renderConnectButton = (platform: keyof VerificationStatusResponse) => {
-    const isVerified = verificationStatus?.[platform]?.verified;
-    if (isVerified) return null;
-
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="ml-2"
-        onClick={() => connectMutation.mutate(platform)}
-        disabled={connectMutation.isPending}
-      >
-        <LinkIcon className="h-4 w-4 mr-2" />
-        Connect {platform}
-      </Button>
-    );
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit((data) => updateProfileMutation.mutate(data))} className="space-y-8">
@@ -231,7 +186,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                       <Input placeholder="@username" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
-                    {renderConnectButton('instagram')}
                   </FormItem>
                 )}
               />
@@ -250,7 +204,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                       <Input placeholder="channel-name" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
-                    {renderConnectButton('youtube')}
                   </FormItem>
                 )}
               />
@@ -271,7 +224,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                       <Input placeholder="@username" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
-                    {renderConnectButton('twitter')}
                   </FormItem>
                 )}
               />
@@ -290,7 +242,6 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                       <Input placeholder="@username" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormMessage />
-                    {renderConnectButton('tiktok')}
                   </FormItem>
                 )}
               />

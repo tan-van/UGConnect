@@ -5,10 +5,11 @@ import { useUser } from "@/hooks/use-user";
 
 // Page imports
 import AuthPage from "@/pages/AuthPage";
-import CreatorDashboard from "@/pages/CreatorDashboard";
+import HomePage from "@/pages/HomePage";
 import CreatorProfile from "@/pages/CreatorProfile";
 import BrowseCreators from "@/pages/BrowseCreators";
 import ClientDashboard from "@/pages/ClientDashboard";
+import CreatorDashboard from "@/pages/CreatorDashboard";
 
 // Components
 import Navbar from "@/components/Navbar";

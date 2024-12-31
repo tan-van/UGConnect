@@ -102,6 +102,14 @@ export default function BrowseCreators() {
                         <span>{(creator.profile.twitterFollowers / 1000).toFixed(1)}K</span>
                       </div>
                     )}
+                    {creator.profile?.podcastListeners && (
+                      <div className="flex items-center gap-1">
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 17v-10l9 5.146-9 4.854z"/>
+                        </svg>
+                        <span>{(creator.profile.podcastListeners / 1000).toFixed(1)}K</span>
+                      </div>
+                    )}
                     {creator.profile?.tiktokFollowers && (
                       <div className="flex items-center gap-1">
                         <Video className="h-4 w-4" />

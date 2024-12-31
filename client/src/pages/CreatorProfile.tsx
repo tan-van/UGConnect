@@ -194,6 +194,29 @@ export default function CreatorProfile() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-2">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 17v-10l9 5.146-9 4.854z"/>
+              </svg>
+              <div className="flex items-center">
+                <p className="font-semibold">Podcast</p>
+                {profile.podcastVerified && (
+                  <Badge variant="secondary" className="ml-2">
+                    <BadgeCheck className="h-3 w-3 mr-1" />
+                    Verified
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <p className="text-2xl font-bold mt-2">
+              {profile.podcastListeners?.toLocaleString() || 'N/A'}
+            </p>
+            <p className="text-sm text-muted-foreground">Monthly Listeners</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
               <SiTiktok className="h-5 w-5" />
               <div className="flex items-center">
                 <p className="font-semibold">TikTok</p>

@@ -128,6 +128,28 @@ export default function CreatorDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
+              Podcast Listeners
+              {verificationStatus?.podcast?.verified && (
+                <Badge variant="secondary" className="ml-2">
+                  <BadgeCheck className="h-3 w-3 mr-1" />
+                  Verified
+                </Badge>
+              )}
+            </CardTitle>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-3 17v-10l9 5.146-9 4.854z"/>
+            </svg>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {profile?.podcastListeners?.toLocaleString() || '0'}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
               X Followers
               {verificationStatus?.twitter.verified && (
                 <Badge variant="secondary" className="ml-2">

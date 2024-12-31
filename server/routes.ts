@@ -466,44 +466,40 @@ export function registerRoutes(app: Express): Server {
 
   // Get creator profile by username
   app.get("/api/creators/:username", async (req, res) => {
-    try {
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.username, req.params.username))
-        .limit(1);
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, req.params.username))
+      .limit(1);
 
-      if (!user) {
-        return res.status(404).json({ message: "Creator not found" });
-      }
-
-      if (user.role !== 'creator') {
-        return res.status(404).json({ message: "User is not a creator" });
-      }
-
-      const [profile] = await db
-        .select()
-        .from(creatorProfiles)
-        .where(eq(creatorProfiles.userId, user.id))
-        .limit(1);
-
-      if (!profile) {
-        return res.status(404).json({ message: "Creator profile not found" });
-      }
-
-      const creatorData = {
-        username: user.username,
-        displayName: user.displayName,
-        bio: user.bio,
-        avatar: user.avatar,
-        ...profile,
-      };
-
-      res.json(creatorData);
-    } catch (error) {
-      console.error("Error fetching creator profile:", error);
-      res.status(500).json({ message: "Failed to fetch creator profile" });
+    if (!user) {
+      return res.status(404).json({ message: "Creator not found" });
     }
+
+    if (user.role !== 'creator') {
+      return res.status(404).json({ message: "User is not a creator" });
+    }
+
+    const [profile] = await db
+      .select()
+      .from(creatorProfiles)
+      .where(eq(creatorProfiles.userId, user.id))
+      .limit(1);
+
+    if (!profile) {
+      return res.status(404).json({ message: "Creator profile not found" });
+    }
+
+    const creatorData = {
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      bio: user.bio,
+      avatar: user.avatar,
+      ...profile,
+    };
+
+    res.json(creatorData);
   });
 
   // List all creators with their profiles

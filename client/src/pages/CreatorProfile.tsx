@@ -4,6 +4,7 @@ import { useParams } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   BadgeCheck,
   DollarSign,
@@ -18,7 +19,7 @@ import {
 import { useUser } from "@/hooks/use-user";
 import ReviewsList from "@/components/ReviewsList";
 import ReviewForm from "@/components/ReviewForm";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface CreatorProfileData {
   id: number;
@@ -52,7 +53,7 @@ interface CreatorProfileData {
 export default function CreatorProfile() {
   const { username } = useParams();
   const { user } = useUser();
-  const [showReviewForm, setShowReviewForm] = useState(false);
+  //const [showReviewForm, setShowReviewForm] = useState(false); // Removed
 
   const { data: profile, isLoading } = useQuery<CreatorProfileData>({
     queryKey: [`/api/creators/${username}`],
@@ -248,7 +249,7 @@ export default function CreatorProfile() {
                 <Card key={index}>
                   <CardContent className="pt-6">
                     <p className="font-semibold">{content.platform}</p>
-                    <a 
+                    <a
                       href={content.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -265,19 +266,25 @@ export default function CreatorProfile() {
       )}
 
       {/* Reviews Section */}
-      <ReviewsList
-        creatorId={profile.id}
-        onReviewClick={() => setShowReviewForm(true)}
-        showReviewButton={isClient}
-      />
-
-      {/* Review Form Dialog */}
-      <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
-        <ReviewForm
-          creatorId={profile.id}
-          onSuccess={() => setShowReviewForm(false)}
-        />
-      </Dialog>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Reviews</h2>
+          {isClient && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>Write a Review</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <ReviewForm
+                  creatorId={profile.id}
+                  onSuccess={() => setShowReviewForm(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+        <ReviewsList creatorId={profile.id} />
+      </div>
     </div>
   );
 }

@@ -770,21 +770,16 @@ export function registerRoutes(app: Express): Server {
         .offset(parseInt(offset as string));
 
       // Get aggregate rating data
-      const aggregateData = await db
-        .select({
-          averageRating: avg(reviews.rating).as("averageRating"),
-          totalCount: db.fn.count(reviews.id).as("totalCount")
-        })
-        .from(reviews)
-        .where(eq(reviews.creatorId, parseInt(creatorId)))
-        .limit(1);
-
-      const [aggregates] = aggregateData;
+      // Calculate total reviews and average rating
+      const totalReviews = creatorReviews.length;
+      const averageRating = totalReviews > 0 
+        ? (creatorReviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews).toFixed(1)
+        : "0.0";
 
       res.json({
         reviews: creatorReviews,
-        averageRating: Number(aggregates?.averageRating || 0).toFixed(1),
-        totalReviews: Number(aggregates?.totalCount || 0)
+        averageRating,
+        totalReviews
       });
     } catch (error) {
       console.error("Error fetching reviews:", error);

@@ -33,6 +33,8 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  console.log('ReviewForm mounted with creatorId:', creatorId, typeof creatorId);
+
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
@@ -43,18 +45,20 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
 
   const submitReviewMutation = useMutation({
     mutationFn: async (data: ReviewFormValues) => {
-      console.log('Submitting review with data:', { ...data, creatorId });
+      const payload = {
+        creatorId: Number(creatorId),
+        rating: data.rating,
+        review: data.review,
+      };
+      console.log('Submitting review with payload:', payload);
+
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-          creatorId: Number(creatorId),
-          rating: data.rating,
-          review: data.review,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -62,7 +66,10 @@ export default function ReviewForm({ creatorId, onClose, onSuccess }: ReviewForm
         console.error('Review submission error:', errorText);
         throw new Error(errorText);
       }
-      return res.json();
+
+      const responseData = await res.json();
+      console.log('Review submission response:', responseData);
+      return responseData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/creators/${creatorId}/reviews`] });

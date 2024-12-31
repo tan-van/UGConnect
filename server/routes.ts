@@ -682,7 +682,15 @@ export function registerRoutes(app: Express): Server {
 
     try {
       const { creatorId, rating, review } = req.body;
-      console.log('Review submission received:', { creatorId, rating, review });
+
+      console.log('Review submission received:', { 
+        creatorId, 
+        rating, 
+        review,
+        creatorIdType: typeof creatorId,
+        userRole: req.user.role,
+        userId: req.user.id
+      });
 
       if (!creatorId || !rating || !review) {
         return res.status(400).json({ message: "Missing required fields" });
@@ -694,8 +702,9 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Check if the creator exists and is actually a creator
-      console.log('Looking up creator:', creatorId);
-      const [creator] = await db
+      console.log('Looking up creator with ID:', creatorId);
+
+      const creator = await db
         .select()
         .from(users)
         .where(and(
@@ -704,10 +713,17 @@ export function registerRoutes(app: Express): Server {
         ))
         .limit(1);
 
-      console.log('Creator lookup result:', creator || 'Not found');
+      console.log('Creator lookup result:', creator);
 
-      if (!creator) {
-        return res.status(404).json({ message: "Creator not found" });
+      if (!creator || creator.length === 0) {
+        console.error('Creator not found for ID:', creatorId);
+        return res.status(404).json({ 
+          message: "Creator not found",
+          debug: {
+            creatorId,
+            lookupResult: creator
+          }
+        });
       }
 
       // Create the review
@@ -728,7 +744,10 @@ export function registerRoutes(app: Express): Server {
       res.json(newReview);
     } catch (error) {
       console.error("Error creating review:", error);
-      res.status(500).json({ message: "Failed to create review" });
+      res.status(500).json({ 
+        message: "Failed to create review",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 

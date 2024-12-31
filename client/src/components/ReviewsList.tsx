@@ -26,13 +26,12 @@ interface ReviewsResponse {
 
 interface ReviewsListProps {
   creatorId: number;
-  onReviewClick?: () => void;
-  showReviewButton?: boolean;
 }
 
-export default function ReviewsList({ creatorId, onReviewClick, showReviewButton = true }: ReviewsListProps) {
+export default function ReviewsList({ creatorId }: ReviewsListProps) {
   const { data, isLoading } = useQuery<ReviewsResponse>({
     queryKey: [`/api/creators/${creatorId}/reviews`],
+    enabled: !!creatorId,
   });
 
   if (isLoading) {
@@ -58,30 +57,25 @@ export default function ReviewsList({ creatorId, onReviewClick, showReviewButton
           <CardTitle>Reviews</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-4xl font-bold">{averageRating.toFixed(1)}</div>
-              <div>
-                <div className="flex mb-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.round(averageRating)
-                          ? "text-yellow-400 fill-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Based on {totalReviews} review{totalReviews !== 1 ? "s" : ""}
-                </div>
+          <div className="flex items-center gap-4">
+            <div className="text-4xl font-bold">{averageRating}</div>
+            <div>
+              <div className="flex mb-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-5 w-5 ${
+                      i < Math.round(Number(averageRating))
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Based on {totalReviews} review{totalReviews !== 1 ? "s" : ""}
               </div>
             </div>
-            {showReviewButton && (
-              <Button onClick={onReviewClick}>Write a Review</Button>
-            )}
           </div>
         </CardContent>
       </Card>

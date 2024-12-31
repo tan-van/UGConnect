@@ -18,10 +18,10 @@ import {
 import { useUser } from "@/hooks/use-user";
 import ReviewsList from "@/components/ReviewsList";
 import ReviewForm from "@/components/ReviewForm";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 interface CreatorProfileData {
-  id: number; // Added id field
+  id: number;
   username: string;
   displayName?: string;
   bio?: string;
@@ -56,6 +56,7 @@ export default function CreatorProfile() {
 
   const { data: profile, isLoading } = useQuery<CreatorProfileData>({
     queryKey: [`/api/creators/${username}`],
+    enabled: !!username,
   });
 
   if (isLoading) {
@@ -265,7 +266,7 @@ export default function CreatorProfile() {
 
       {/* Reviews Section */}
       <ReviewsList
-        creatorId={profile.id} // Assuming profile.id exists
+        creatorId={profile.id}
         onReviewClick={() => setShowReviewForm(true)}
         showReviewButton={isClient}
       />
@@ -273,7 +274,7 @@ export default function CreatorProfile() {
       {/* Review Form Dialog */}
       <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
         <ReviewForm
-          creatorId={profile.id} // Assuming profile.id exists
+          creatorId={profile.id}
           onSuccess={() => setShowReviewForm(false)}
         />
       </Dialog>

@@ -15,8 +15,13 @@ export default function JobListingPage() {
   const { user } = useUser();
   const [coverLetter, setCoverLetter] = useState("");
 
-  const { data: job, isLoading } = useQuery<Job & { employer: { companyName: string } }>({
-    queryKey: [`/api/jobs/${id}`],
+  const { data: job, isLoading } = useQuery<Job & { client: { displayName: string } }>({
+    queryKey: ['job', id],
+    queryFn: async () => {
+      const res = await fetch(`/api/jobs/${id}`);
+      if (!res.ok) throw new Error('Failed to fetch job');
+      return res.json();
+    },
   });
 
   const applyMutation = useMutation({
@@ -59,7 +64,7 @@ export default function JobListingPage() {
         <div className="flex flex-wrap gap-4 text-muted-foreground">
           <div className="flex items-center">
             <Building2 className="h-4 w-4 mr-2" />
-            {job.employer.companyName}
+            {job.client.displayName}
           </div>
           <div className="flex items-center">
             <MapPin className="h-4 w-4 mr-2" />

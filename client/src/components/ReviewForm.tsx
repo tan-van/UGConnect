@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 const reviewSchema = z.object({
   rating: z.number().min(1, "Please select a rating").max(5),
-  review: z.string().min(10, "Review must be at least 10 characters long"),
+  review: z.string().min(10, "Review must be at least 10 characters long").max(1000, "Review cannot exceed 1000 characters"),
 });
 
 type ReviewFormValues = z.infer<typeof reviewSchema>;

@@ -26,13 +26,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation, useParams } from "wouter";
 
 const jobSchema = z.object({
-  title: z.string().min(3),
-  description: z.string().min(50),
-  location: z.string().min(2),
+  title: z.string().min(10, "Title must be at least 10 characters"),
+  description: z.string().min(50, "Description must be at least 50 characters"),
+  location: z.string().min(10, "Location must be at least 10 characters"),
   budget: z.string().optional(),
   type: z.string(),
   remote: z.boolean(),
-  requirements: z.string().min(50),
+  requirements: z.string().min(50, "Requirements must be at least 50 characters"),
 });
 
 type JobFormValues = z.infer<typeof jobSchema>;

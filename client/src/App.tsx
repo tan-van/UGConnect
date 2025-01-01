@@ -14,6 +14,7 @@ import CreatorDashboard from "@/pages/CreatorDashboard";
 import BrowseJobs from "@/pages/BrowseJobs";
 import CreateJob from "@/pages/CreateJob";
 import JobListingPage from './pages/JobListingPage'; // Added import
+import EditJobPage from './pages/EditJobPage'; // Added import for EditJobPage
 
 // Components
 import Navbar from "@/components/Navbar";
@@ -62,7 +63,8 @@ function App() {
           </Route>
           <Route path="/jobs" component={BrowseJobs} />
           <Route path="/jobs/create" component={CreateJob} />
-          <Route path="/jobs/:id" component={JobListingPage} /> {/* Added route for job details */}
+          <Route path="/jobs/:id" component={JobListingPage} />
+          <Route path="/jobs/:id/edit" component={EditJobPage} /> {/* Added route for job edit */}
           <Route path="/dashboard">
             {() => user.role === 'creator' ? <CreatorDashboard /> : <ClientDashboard />}
           </Route>

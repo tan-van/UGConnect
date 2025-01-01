@@ -273,6 +273,43 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.put("/api/jobs/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const jobId = parseInt(req.params.id);
+      const job = await db
+        .select()
+        .from(jobs)
+        .where(eq(jobs.id, jobId))
+        .limit(1);
+
+      if (!job || job.length === 0) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      if (job[0].clientId !== req.user.id) {
+        return res.status(403).json({ message: "Not authorized" });
+      }
+
+      const [updatedJob] = await db
+        .update(jobs)
+        .set({
+          ...req.body,
+          updatedAt: new Date(),
+        })
+        .where(eq(jobs.id, jobId))
+        .returning();
+
+      res.json(updatedJob);
+    } catch (error) {
+      console.error("Error updating job:", error);
+      res.status(500).json({ message: "Failed to update job" });
+    }
+  });
+
   app.post("/api/jobs", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Not authenticated" });

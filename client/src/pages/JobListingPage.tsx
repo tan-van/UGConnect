@@ -19,11 +19,15 @@ export default function JobListingPage() {
     queryKey: ['job', id],
     queryFn: async () => {
       const res = await fetch(`/api/jobs/${id}`);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to fetch job');
+      const contentType = res.headers.get('content-type');
+      
+      if (!res.ok || !contentType?.includes('application/json')) {
+        throw new Error('Failed to fetch job details');
       }
-      return res.json();
+      
+      const data = await res.json();
+      if (!data) throw new Error('No job data found');
+      return data;
     },
   });
 

@@ -294,10 +294,21 @@ export function registerRoutes(app: Express): Server {
         return res.status(403).json({ message: "Not authorized" });
       }
 
+      // Parse requirements if it's a string
+      const requirements = typeof req.body.requirements === 'string' 
+        ? req.body.requirements.split('\n').filter(Boolean)
+        : req.body.requirements;
+
       const [updatedJob] = await db
         .update(jobs)
         .set({
-          ...req.body,
+          title: req.body.title,
+          description: req.body.description,
+          location: req.body.location,
+          budget: req.body.budget,
+          type: req.body.type,
+          remote: req.body.remote,
+          requirements: requirements,
           updatedAt: new Date(),
         })
         .where(eq(jobs.id, jobId))

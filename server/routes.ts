@@ -753,7 +753,105 @@ export function registerRoutes(app: Express): Server {
 
       console.log("Initial creators query result:", creators);
 
-      // Calculate total reach and engagement metrics for sorting
+      // If no creators exist, create sample data
+      if (!creators || creators.length === 0) {
+        console.log("No creators found, creating sample data...");
+        const sampleUsers = [
+          {
+            username: "techstar",
+            password: await hash("password123"),
+            email: "tech@star.com",
+            role: 'creator' as const,
+            displayName: "Tech Star",
+            bio: "Top tech reviewer with over 2M followers",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          },
+          {
+            username: "lifestylepro",
+            password: await hash("password123"),
+            email: "lifestyle@pro.com",
+            role: 'creator' as const,
+            displayName: "Lifestyle Pro",
+            bio: "Lifestyle and wellness content creator with 1.5M+ engaged followers",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          }
+        ];
+
+        console.log("Creating sample users...");
+        const insertedUsers = await db.insert(users).values(sampleUsers).returning();
+
+        const creatorProfileData = [
+          {
+            userId: insertedUsers[0].id,
+            instagram: "techstar",
+            youtube: "techstar",
+            tiktok: "techstar",
+            twitter: "techstar",
+            instagramFollowers: 800000,
+            youtubeSubscribers: 1200000,
+            tiktokFollowers: 500000,
+            twitterFollowers: 300000,
+            averageViews: 250000,
+            engagementRate: "4.8%",
+            contentCategories: ['Technology', 'Reviews', 'Education'],
+            ratePerPost: "$2000-3000 per video",
+            availability: true,
+            lastUpdated: new Date(),
+          },
+          {
+            userId: insertedUsers[1].id,
+            instagram: "lifestylepro",
+            youtube: "lifestylepro",
+            tiktok: "lifestylepro",
+            twitter: "lifestylepro",
+            instagramFollowers: 600000,
+            youtubeSubscribers: 900000,
+            tiktokFollowers: 700000,
+            twitterFollowers: 200000,
+            averageViews: 180000,
+            engagementRate: "5.2%",
+            contentCategories: ['Lifestyle', 'Wellness', 'Fashion'],
+            ratePerPost: "$1500-2500 per post",
+            availability: true,
+            lastUpdated: new Date(),
+          }
+        ];
+
+        console.log("Creating creator profiles...");
+        await db.insert(creatorProfiles).values(creatorProfileData);
+
+        // Fetch the newly created creators
+        const newCreators = await db
+          .select({
+            id: users.id,
+            username: users.username,
+            displayName: users.displayName,
+            bio: users.bio,
+            avatar: users.avatar,
+            profile: {
+              instagram: creatorProfiles.instagram,
+              youtube: creatorProfiles.youtube,
+              tiktok: creatorProfiles.tiktok,
+              twitter: creatorProfiles.twitter,
+              instagramFollowers: creatorProfiles.instagramFollowers,
+              youtubeSubscribers: creatorProfiles.youtubeSubscribers,
+              tiktokFollowers: creatorProfiles.tiktokFollowers,
+              twitterFollowers: creatorProfiles.twitterFollowers,
+              averageViews: creatorProfiles.averageViews,
+              engagementRate: creatorProfiles.engagementRate,
+              contentCategories: creatorProfiles.contentCategories,
+            }
+          })
+          .from(users)
+          .innerJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
+          .where(eq(users.role, 'creator'));
+
+        creators = newCreators;
+      }
+
+      // Calculate total reach and sort creators
       const sortedCreators = creators
         .map(creator => ({
           ...creator,
@@ -804,15 +902,6 @@ export function registerRoutes(app: Express): Server {
     try {
       const { creatorId, rating, review } = req.body;
 
-      console.log('Review submission received:', { 
-        creatorId, 
-        rating, 
-        review,
-        creatorIdType: typeof creatorId,
-        userRole: req.user.role,
-        userId: req.user.id
-      });
-
       if (!creatorId || !rating || !review) {
         return res.status(400).json({ message: "Missing required fields" });
       }
@@ -822,10 +911,10 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "Rating must be between 1 and 5" });
       }
 
-      //      // Check if the creator exists and is actually a creator
+      // Check if the creator exists and is actually a creator
       console.log('Looking up creator with ID:', creatorId);
 
-      const creator = await db
+      const [creator] = await db
         .select()
         .from(users)
         .where(and(
@@ -834,17 +923,8 @@ export function registerRoutes(app: Express): Server {
         ))
         .limit(1);
 
-      console.log('Creator lookup result:', creator);
-
-      if (!creator || creator.length === 0) {
-        console.error('Creator not found for ID:', creatorId);
-        return res.status(404).json({ 
-          message: "Creator not found",
-          debug: {
-            creatorId,
-            lookupResult: creator
-          }
-        });
+      if (!creator) {
+        return res.status(404).json({ message: "Creator not found" });
       }
 
       // Create the review
@@ -853,22 +933,19 @@ export function registerRoutes(app: Express): Server {
         .values({
           creatorId: Number(creatorId),
           clientId: req.user.id,
-          rating: Number(rating),
+          rating,
           review,
-          helpfulVotes: 0,
           createdAt: new Date(),
-          updatedAt: new Date(),
         })
         .returning();
 
-      console.log('Review created successfully:', newReview);
-      res.json(newReview);
-    } catch (error) {
-      console.error("Error creating review:", error);
-      res.status(500).json({ 
-        message: "Failed to create review",
-        error: error instanceof Error ? error.message : String(error)
+      res.json({
+        message: "Review submitted successfully",
+        review: newReview,
       });
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      res.status(500).json({ message: "Failed to submit review" });
     }
   });
 

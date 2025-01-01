@@ -276,6 +276,57 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Add after the GET /api/profile endpoint
+  app.post("/api/profile/initialize", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    if (req.user.role !== 'creator') {
+      return res.status(403).json({ message: "Only creators can initialize profiles" });
+    }
+
+    try {
+      const [existingProfile] = await db
+        .select()
+        .from(creatorProfiles)
+        .where(eq(creatorProfiles.userId, req.user.id))
+        .limit(1);
+
+      if (existingProfile) {
+        return res.json(existingProfile);
+      }
+
+      // Create default profile
+      const [profile] = await db
+        .insert(creatorProfiles)
+        .values({
+          userId: req.user.id,
+          instagram: "",
+          youtube: "",
+          tiktok: "",
+          twitter: "",
+          instagramFollowers: 0,
+          youtubeSubscribers: 0,
+          tiktokFollowers: 0,
+          twitterFollowers: 0,
+          averageViews: 0,
+          engagementRate: "0%",
+          contentCategories: [],
+          showcaseContent: [],
+          ratePerPost: "$0",
+          availability: true,
+          lastUpdated: new Date(),
+        })
+        .returning();
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error initializing profile:", error);
+      res.status(500).json({ message: "Failed to initialize profile" });
+    }
+  });
+
   // Update creator profile
   app.put("/api/profile", async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -867,8 +918,7 @@ const platformConfigs = {
     redirectUri: `${process.env.APP_URL}/api/connect/twitter/callback`,
     scope: 'users.read tweet.read',
   },
-  tiktok: {
-    authUrl: 'https://www.tiktok.com/auth/authorize/',
+  tiktok: {    authUrl: 'https://www.tiktok.com/auth/authorize/',
     clientId: process.env.TIKTOK_CLIENT_ID,
     redirectUri: `${process.env.APP_URL}/api/connect/tiktok/callback`,
     scope: 'user.info.basic',

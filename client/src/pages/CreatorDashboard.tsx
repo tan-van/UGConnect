@@ -1,10 +1,11 @@
 import { useUser } from "@/hooks/use-user";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import CreatorProfileEditor from "@/components/CreatorProfileEditor";
 import { Instagram, Youtube, Twitter, BadgeCheck } from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
 
 interface CreatorProfile {
   userId: number;
@@ -46,14 +47,35 @@ interface VerificationStatusResponse {
 export default function CreatorDashboard() {
   const { user } = useUser();
 
+  const initializeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/profile/initialize', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to initialize profile');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+    },
+  });
+
   const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],
     enabled: !!user && user.role === 'creator',
+    onError: (error) => {
+      if (error instanceof Error && error.message.includes('404')) {
+        initializeMutation.mutate();
+      }
+    },
   });
 
   const { data: verificationStatus, isLoading: isVerificationLoading } = useQuery<VerificationStatusResponse>({
     queryKey: ['/api/profile/verification-status'],
-    enabled: !!user && user.role === 'creator',
+    enabled: !!user && user.role === 'creator' && !!profile,
   });
 
   if (!user || user.role !== 'creator') {
@@ -67,7 +89,7 @@ export default function CreatorDashboard() {
     );
   }
 
-  if (isProfileLoading || isVerificationLoading) {
+  if (isProfileLoading || isVerificationLoading || initializeMutation.isPending) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-8 w-64" />

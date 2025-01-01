@@ -363,13 +363,18 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                           .filter(cat => cat.length > 0);
                         field.onChange(categories);
                       }}
+                      value=""
                       onKeyDown={(e) => {
                         if (e.key === ',') {
                           e.preventDefault();
-                          const currentValue = e.currentTarget.value;
-                          const categories = [...(field.value || []), currentValue.trim()];
-                          field.onChange(categories);
-                          e.currentTarget.value = '';
+                          const currentValue = e.currentTarget.value.trim();
+                          if (currentValue) {
+                            const existingCategories = field.value || [];
+                            if (!existingCategories.includes(currentValue)) {
+                              field.onChange([...existingCategories, currentValue]);
+                            }
+                            e.currentTarget.value = '';
+                          }
                         }
                       }}
                     />

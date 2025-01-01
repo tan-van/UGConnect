@@ -35,9 +35,10 @@ declare global {
       username: string;
       email: string;
       role: 'creator' | 'client';
-      displayName?: string | undefined;
-      bio?: string | undefined;
+      displayName: string | undefined;
+      bio: string | undefined;
       createdAt: Date;
+      completedOnboarding: boolean;
     }
   }
 }
@@ -94,9 +95,10 @@ export function setupAuth(app: Express) {
           username: user.username,
           email: user.email,
           role: user.role,
-          displayName: user.displayName,
-          bio: user.bio,
-          createdAt: user.createdAt
+          displayName: user.displayName || undefined,
+          bio: user.bio || undefined,
+          createdAt: user.createdAt,
+          completedOnboarding: user.completedOnboarding
         });
       } catch (err) {
         console.error('Login error:', err);
@@ -126,9 +128,10 @@ export function setupAuth(app: Express) {
         username: user.username,
         email: user.email,
         role: user.role,
-        displayName: user.displayName,
-        bio: user.bio,
-        createdAt: user.createdAt
+        displayName: user.displayName || undefined,
+        bio: user.bio || undefined,
+        createdAt: user.createdAt,
+        completedOnboarding: user.completedOnboarding
       });
     } catch (err) {
       done(err);
@@ -162,7 +165,7 @@ export function setupAuth(app: Express) {
 
       // Validate role
       if (!['creator', 'client'].includes(role)) {
-        return res.status(400).json({ message: "Invalid role" });
+        return res.status(403).json({ message: "Invalid role" });
       }
 
       // Check for existing username or email
@@ -186,6 +189,8 @@ export function setupAuth(app: Express) {
           email,
           role,
           displayName: displayName || username,
+          completedOnboarding: false,
+          createdAt: new Date()
         })
         .returning();
 
@@ -194,9 +199,10 @@ export function setupAuth(app: Express) {
         username: newUser.username,
         email: newUser.email,
         role: newUser.role,
-        displayName: newUser.displayName,
-        bio: newUser.bio,
-        createdAt: newUser.createdAt
+        displayName: newUser.displayName || undefined,
+        bio: newUser.bio || undefined,
+        createdAt: newUser.createdAt,
+        completedOnboarding: newUser.completedOnboarding
       };
 
       req.login(userForClient, (err) => {

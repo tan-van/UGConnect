@@ -725,7 +725,6 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/creators/spotlight", async (_req, res) => {
     try {
       console.log("Fetching spotlight creators...");
-      // Get creators with their profiles and calculate total followers
       const creators = await db
         .select({
           id: users.id,
@@ -748,8 +747,9 @@ export function registerRoutes(app: Express): Server {
           }
         })
         .from(users)
-        .leftJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
+      
+      console.log("Found creators:", creators);
 
       console.log("Initial creators query result:", creators);
 

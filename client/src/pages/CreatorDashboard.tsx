@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useUser } from "@/hooks/use-user";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -71,24 +72,15 @@ export default function CreatorDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
-      window.location.reload(); // Reload to show the initialized profile
+      window.location.reload();
     },
   });
 
-  // Auto-initialize profile if not found
   React.useEffect(() => {
     if (!isProfileLoading && !profile) {
       initializeMutation.mutate();
     }
   }, [isProfileLoading, profile]);
-    queryKey: ['/api/profile'],
-    enabled: !!user && user.role === 'creator',
-    onError: (error) => {
-      if (error instanceof Error && error.message.includes('404')) {
-        initializeMutation.mutate();
-      }
-    },
-  });
 
   const { data: verificationStatus, isLoading: isVerificationLoading } = useQuery<VerificationStatusResponse>({
     queryKey: ['/api/profile/verification-status'],
@@ -144,7 +136,6 @@ export default function CreatorDashboard() {
         </p>
       </div>
 
-      {/* Social Stats Overview */}
       <div className="grid gap-4 md:grid-cols-3">
         {profile?.instagram && (
           <Card>
@@ -213,7 +204,6 @@ export default function CreatorDashboard() {
         )}
       </div>
 
-      {/* Profile Editor */}
       <Card>
         <CardHeader>
           <CardTitle>Profile Settings</CardTitle>

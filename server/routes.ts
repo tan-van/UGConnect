@@ -855,11 +855,11 @@ export function registerRoutes(app: Express): Server {
       const sortedCreators = creators
         .map(creator => ({
           ...creator,
-          totalReach: (creator.profile.instagramFollowers || 0) +
-                     (creator.profile.youtubeSubscribers || 0) +
-                     (creator.profile.tiktokFollowers || 0) +
-                     (creator.profile.twitterFollowers || 0),
-          engagementRate: parseFloat(creator.profile.engagementRate?.replace('%', '') || '0')
+          totalReach: (creator.profile?.instagramFollowers || 0) +
+                     (creator.profile?.youtubeSubscribers || 0) +
+                     (creator.profile?.tiktokFollowers || 0) +
+                     (creator.profile?.twitterFollowers || 0),
+          engagementRate: parseFloat((creator.profile?.engagementRate || '0').replace('%', ''))
         }))
         .sort((a, b) => {
           // Scoring algorithm:

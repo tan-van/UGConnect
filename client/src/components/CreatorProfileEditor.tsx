@@ -363,6 +363,15 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                           .filter(cat => cat.length > 0);
                         field.onChange(categories);
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === ',') {
+                          e.preventDefault();
+                          const currentValue = e.currentTarget.value;
+                          const categories = [...(field.value || []), currentValue.trim()];
+                          field.onChange(categories);
+                          e.currentTarget.value = '';
+                        }
+                      }}
                     />
                   </FormControl>
                   <p className="text-sm text-muted-foreground">

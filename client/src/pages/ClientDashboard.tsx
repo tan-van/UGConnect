@@ -1,3 +1,4 @@
+
 import { useUser } from "@/hooks/use-user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,6 @@ interface JobWithClient extends Job {
 export default function ClientDashboard() {
   const { user } = useUser();
   const { data: jobs, isLoading } = useQuery<JobWithClient[]>({
-    
-  const shouldShowTutorial = !jobs || jobs.length === 0;
     queryKey: ['/api/jobs', { clientId: user?.id?.toString() }],
     queryFn: async ({ queryKey }) => {
       const [_, params] = queryKey;
@@ -34,6 +33,8 @@ export default function ClientDashboard() {
       return response.json();
     },
   });
+
+  const shouldShowTutorial = !jobs || jobs.length === 0;
 
   return (
     <div className="space-y-6">

@@ -165,6 +165,28 @@ export default function CreatorProfile() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Social Stats Cards */}
+        {profile.youtube && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2">
+                <SiYoutube className="h-5 w-5 text-red-500" />
+                <div className="flex items-center">
+                  <p className="font-semibold">YouTube</p>
+                  {profile.youtubeVerified && (
+                    <Badge variant="secondary" className="ml-2">
+                      <BadgeCheck className="h-3 w-3 mr-1" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <p className="text-2xl font-bold mt-2">
+                {profile.youtubeSubscribers?.toLocaleString() || 'N/A'}
+              </p>
+              <p className="text-sm text-muted-foreground">Subscribers</p>
+            </CardContent>
+          </Card>
+        )}
         {profile.twitter && (
           <Card>
             <CardContent className="pt-6">

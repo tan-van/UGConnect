@@ -14,7 +14,8 @@ import {
 import {
   SiInstagram,
   SiYoutube,
-  SiTiktok
+  SiTiktok,
+  SiX
 } from "react-icons/si";
 import { useUser } from "@/hooks/use-user";
 import ReviewsList from "@/components/ReviewsList";
@@ -164,6 +165,28 @@ export default function CreatorProfile() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Social Stats Cards */}
+        {profile.twitter && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2">
+                <SiX className="h-5 w-5" />
+                <div className="flex items-center">
+                  <p className="font-semibold">X</p>
+                  {profile.twitterVerified && (
+                    <Badge variant="secondary" className="ml-2">
+                      <BadgeCheck className="h-3 w-3 mr-1" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <p className="text-2xl font-bold mt-2">
+                {profile.twitterFollowers?.toLocaleString() || 'N/A'}
+              </p>
+              <p className="text-sm text-muted-foreground">Followers</p>
+            </CardContent>
+          </Card>
+        )}
         {profile.instagramFollowers && (
           <Card>
             <CardContent className="pt-6">

@@ -19,6 +19,13 @@ interface OnboardingTutorialProps {
   shouldShowTutorial?: boolean;
 }
 
+export default function OnboardingTutorial({ 
+  isOpen, 
+  onClose, 
+  userRole,
+  shouldShowTutorial = false 
+}: OnboardingTutorialProps) {
+
 interface Step {
   title: string;
   description: string;

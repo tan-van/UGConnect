@@ -1,9 +1,9 @@
-
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Briefcase, MessageSquare, Trophy } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
+import CreatorSpotlight from "@/components/CreatorSpotlight";
 
 export default function HomePage() {
   const { user } = useUser();
@@ -73,6 +73,13 @@ export default function HomePage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* Creator Spotlight Section */}
+      <section className="py-16">
+        <div className="container mx-auto">
+          <CreatorSpotlight />
         </div>
       </section>
     </div>

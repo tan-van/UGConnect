@@ -721,6 +721,65 @@ export function registerRoutes(app: Express): Server {
   });
 
 
+  // Add after the GET /api/creators endpoint
+  app.get("/api/creators/spotlight", async (_req, res) => {
+    try {
+      // Get creators with their profiles and calculate total followers
+      const creators = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          displayName: users.displayName,
+          bio: users.bio,
+          avatar: users.avatar,
+          profile: {
+            instagram: creatorProfiles.instagram,
+            youtube: creatorProfiles.youtube,
+            tiktok: creatorProfiles.tiktok,
+            twitter: creatorProfiles.twitter,
+            instagramFollowers: creatorProfiles.instagramFollowers,
+            youtubeSubscribers: creatorProfiles.youtubeSubscribers,
+            tiktokFollowers: creatorProfiles.tiktokFollowers,
+            twitterFollowers: creatorProfiles.twitterFollowers,
+            averageViews: creatorProfiles.averageViews,
+            engagementRate: creatorProfiles.engagementRate,
+            contentCategories: creatorProfiles.contentCategories,
+            ratePerPost: creatorProfiles.ratePerPost,
+          }
+        })
+        .from(users)
+        .innerJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
+        .where(eq(users.role, 'creator'));
+
+      // Calculate total reach and sort creators
+      const sortedCreators = creators
+        .map(creator => ({
+          ...creator,
+          totalReach: (creator.profile.instagramFollowers || 0) +
+            (creator.profile.youtubeSubscribers || 0) +
+            (creator.profile.tiktokFollowers || 0) +
+            (creator.profile.twitterFollowers || 0),
+          engagementRate: parseFloat(creator.profile.engagementRate?.replace('%', '') || '0')
+        }))
+        .sort((a, b) => {
+          // Sort by total reach and engagement rate
+          const reachWeight = 0.7;
+          const engagementWeight = 0.3;
+
+          const aScore = (a.totalReach * reachWeight) + (a.engagementRate * engagementWeight * 100000);
+          const bScore = (b.totalReach * reachWeight) + (b.engagementRate * engagementWeight * 100000);
+
+          return bScore - aScore;
+        })
+        .slice(0, 5); // Get top 5 creators
+
+      res.json(sortedCreators);
+    } catch (error) {
+      console.error("Error fetching spotlight creators:", error);
+      res.status(500).json({ message: "Failed to fetch spotlight creators" });
+    }
+  });
+
   // Create a review
   app.post("/api/reviews", async (req, res) => {
     if (!req.isAuthenticated()) {

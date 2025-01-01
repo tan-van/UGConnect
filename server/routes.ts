@@ -20,6 +20,41 @@ export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
   // Add jobs route
+  // Get single job by ID
+  app.get("/api/jobs/:id", async (req, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      
+      const job = await db
+        .select({
+          id: jobs.id,
+          title: jobs.title,
+          description: jobs.description,
+          requirements: jobs.requirements,
+          budget: jobs.budget,
+          location: jobs.location,
+          remote: jobs.remote,
+          type: jobs.type,
+          status: jobs.status,
+          featured: jobs.featured,
+          createdAt: jobs.createdAt,
+          clientId: jobs.clientId
+        })
+        .from(jobs)
+        .where(eq(jobs.id, jobId))
+        .limit(1);
+
+      if (!job || job.length === 0) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      res.json(job[0]);
+    } catch (error) {
+      console.error("Error fetching job:", error);
+      res.status(500).json({ message: "Failed to fetch job" });
+    }
+  });
+
   app.get("/api/jobs", async (req, res) => {
     try {
       const { type, clientId } = req.query;

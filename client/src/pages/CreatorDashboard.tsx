@@ -32,18 +32,7 @@ interface CreatorProfile {
   contentCategories?: string[] | null;
   ratePerPost?: string | null;
   availability: boolean;
-}
-
-interface VerificationStatus {
-  verified: boolean;
-  verifiedAt: string | null;
-}
-
-interface VerificationStatusResponse {
-  instagram: VerificationStatus;
-  youtube: VerificationStatus;
-  twitter: VerificationStatus;
-  tiktok: VerificationStatus;
+  lastUpdated?: Date;
 }
 
 export default function CreatorDashboard() {
@@ -74,16 +63,6 @@ export default function CreatorDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
       window.location.reload();
-    },
-  });
-
-  const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
-    queryKey: ['/api/profile'],
-    enabled: !!user && user.role === 'creator',
-    onError: (error) => {
-      if (error instanceof Error && error.message.includes('404')) {
-        initializeMutation.mutate();
-      }
     },
   });
 

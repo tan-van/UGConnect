@@ -748,7 +748,7 @@ export function registerRoutes(app: Express): Server {
           }
         })
         .from(users)
-        .innerJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
+        .leftJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
 
       console.log("Initial creators query result:", creators);

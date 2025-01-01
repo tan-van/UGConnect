@@ -17,10 +17,13 @@ export default function ClientDashboard() {
   const { user } = useUser();
 
   const { data: jobs, isLoading } = useQuery<JobWithClient[]>({
-    queryKey: ['/api/jobs', { clientId: user?.id }],
+    queryKey: ['/api/jobs', { clientId: user?.id?.toString() }],
     queryFn: async ({ queryKey }) => {
       const [_, params] = queryKey;
-      const searchParams = new URLSearchParams(params as Record<string, string>);
+      const searchParams = new URLSearchParams();
+      if (params.clientId) {
+        searchParams.append('clientId', params.clientId);
+      }
       const response = await fetch(`/api/jobs?${searchParams}`, {
         credentials: "include",
       });

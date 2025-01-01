@@ -146,6 +146,15 @@ export default function CreatorProfile() {
             </Button>
           )}
         </div>
+        {profile.contentCategories && profile.contentCategories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {profile.contentCategories.map((category, index) => (
+              <Badge key={index} variant="outline">
+                {category}
+              </Badge>
+            ))}
+          </div>
+        )}
         {profile.availability && (
           <Badge variant="secondary">
             <Clock className="h-3 w-3 mr-1" />

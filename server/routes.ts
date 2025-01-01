@@ -853,33 +853,21 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Calculate total reach and sort creators
+      if (!creators || creators.length === 0) {
+        return res.json([]);
+      }
+
       const sortedCreators = creators
+        .filter(creator => creator.profile) // Only include creators with profiles
         .map(creator => ({
           ...creator,
-          totalReach: (creator.profile?.instagramFollowers || 0) +
-                     (creator.profile?.youtubeSubscribers || 0) +
-                     (creator.profile?.tiktokFollowers || 0) +
-                     (creator.profile?.twitterFollowers || 0),
-          engagementRate: parseFloat((creator.profile?.engagementRate || '0').replace('%', ''))
+          totalReach: (creator.profile.instagramFollowers || 0) +
+                     (creator.profile.youtubeSubscribers || 0) +
+                     (creator.profile.tiktokFollowers || 0) +
+                     (creator.profile.twitterFollowers || 0),
+          engagementRate: parseFloat((creator.profile.engagementRate || '0').replace('%', ''))
         }))
-        .sort((a, b) => {
-          // Scoring algorithm:
-          // 60% weight on total reach
-          // 30% weight on engagement rate
-          // 10% weight on average views
-          const reachWeight = 0.6;
-          const engagementWeight = 0.3;
-          const viewsWeight = 0.1;
-
-          const aScore = (a.totalReach * reachWeight) +
-                        (a.engagementRate * engagementWeight * 100000) +
-                        ((a.profile.averageViews || 0) * viewsWeight);
-          const bScore = (b.totalReach * reachWeight) +
-                        (b.engagementRate * engagementWeight * 100000) +
-                        ((b.profile.averageViews || 0) * viewsWeight);
-
-          return bScore - aScore;
-        })
+        .sort((a, b) => b.totalReach - a.totalReach)
         .slice(0, 2); // Get only top 2 creators
 
       console.log('Returning spotlight creators:', sortedCreators);

@@ -1,6 +1,6 @@
 # UGConnect
 
-UGConnect is an intelligent professional networking platform designed to connect creators and job seekers through advanced matching technologies and comprehensive profile management.
+UGConnect is a professional networking platform designed to connect creators and brands looking for User Generated Content to promote their products.
 
 ## Features
 

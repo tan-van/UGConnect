@@ -48,6 +48,7 @@ function App() {
           isOpen={showOnboarding}
           onClose={() => setShowOnboarding(false)}
           userRole={user.role}
+          shouldShowTutorial={true}
         />
       )}
       <Navbar />

@@ -15,9 +15,9 @@ interface JobWithClient extends Job {
 
 export default function ClientDashboard() {
   const { user } = useUser();
-  const shouldShowTutorial = !jobs || jobs.length === 0;
-
   const { data: jobs, isLoading } = useQuery<JobWithClient[]>({
+    
+  const shouldShowTutorial = !jobs || jobs.length === 0;
     queryKey: ['/api/jobs', { clientId: user?.id?.toString() }],
     queryFn: async ({ queryKey }) => {
       const [_, params] = queryKey;

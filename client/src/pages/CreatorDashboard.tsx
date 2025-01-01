@@ -48,6 +48,16 @@ interface VerificationStatusResponse {
 
 export default function CreatorDashboard() {
   const { user } = useUser();
+  const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
+    queryKey: ['/api/profile'],
+    enabled: !!user && user.role === 'creator',
+    onError: (error) => {
+      if (error instanceof Error && error.message.includes('404')) {
+        initializeMutation.mutate();
+      }
+    },
+  });
+
   const shouldShowTutorial = !profile?.lastUpdated;
 
   const initializeMutation = useMutation({

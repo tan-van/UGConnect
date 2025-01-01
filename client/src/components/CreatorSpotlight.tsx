@@ -27,7 +27,7 @@ interface SpotlightCreator {
 }
 
 export default function CreatorSpotlight() {
-  const { data: creators, isLoading } = useQuery<SpotlightCreator[]>({
+  const { data: creators, isLoading, error } = useQuery<SpotlightCreator[]>({
     queryKey: ['/api/creators/spotlight'],
   });
 
@@ -44,7 +44,9 @@ export default function CreatorSpotlight() {
     );
   }
 
-  if (!creators || creators.length === 0) {
+  // If there's an error or no creators, fetch regular creators
+  if (error || !creators || creators.length === 0) {
+    console.log("Spotlight fetch error or no creators:", error);
     return null;
   }
 

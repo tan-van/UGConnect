@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -18,13 +19,6 @@ interface OnboardingTutorialProps {
   userRole: 'creator' | 'client';
   shouldShowTutorial?: boolean;
 }
-
-export default function OnboardingTutorial({ 
-  isOpen, 
-  onClose, 
-  userRole,
-  shouldShowTutorial = false 
-}: OnboardingTutorialProps) {
 
 interface Step {
   title: string;
@@ -68,7 +62,7 @@ const clientSteps: Step[] = [
   },
 ];
 
-export default function OnboardingTutorial({ isOpen, onClose, userRole }: OnboardingTutorialProps) {
+export default function OnboardingTutorial({ isOpen, onClose, userRole, shouldShowTutorial = false }: OnboardingTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();

@@ -49,6 +49,22 @@ interface VerificationStatusResponse {
 export default function CreatorDashboard() {
   const { user } = useUser();
 
+  const initializeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/profile/initialize', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to initialize profile');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+    },
+  });
+
   const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],
     enabled: !!user && user.role === 'creator',
@@ -58,8 +74,6 @@ export default function CreatorDashboard() {
       }
     },
   });
-
-  const initializeMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch('/api/profile/initialize', {
         method: 'POST',

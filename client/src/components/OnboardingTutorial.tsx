@@ -16,6 +16,7 @@ interface OnboardingTutorialProps {
   isOpen: boolean;
   onClose: () => void;
   userRole: 'creator' | 'client';
+  shouldShowTutorial?: boolean;
 }
 
 interface Step {
@@ -107,6 +108,8 @@ export default function OnboardingTutorial({ isOpen, onClose, userRole }: Onboar
 
   const CurrentIcon = steps[currentStep].Icon;
 
+  if (!isOpen || !shouldShowTutorial) return null;
+  
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) {

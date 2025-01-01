@@ -48,6 +48,7 @@ interface VerificationStatusResponse {
 
 export default function CreatorDashboard() {
   const { user } = useUser();
+  const shouldShowTutorial = !profile?.lastUpdated;
 
   const initializeMutation = useMutation({
     mutationFn: async () => {

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import CreatorProfileEditor from "@/components/CreatorProfileEditor";
-import { Instagram, Youtube, Twitter, BadgeCheck } from "lucide-react";
+import { Instagram, Youtube, Twitter, Video, BadgeCheck } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
 interface CreatorProfile {
@@ -62,6 +62,7 @@ export default function CreatorDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+      window.location.reload();
     },
   });
 
@@ -72,21 +73,6 @@ export default function CreatorDashboard() {
       if (error instanceof Error && error.message.includes('404')) {
         initializeMutation.mutate();
       }
-    },
-  });
-    mutationFn: async () => {
-      const response = await fetch('/api/profile/initialize', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to initialize profile');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
-      window.location.reload();
     },
   });
 

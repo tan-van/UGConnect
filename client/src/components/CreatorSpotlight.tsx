@@ -35,8 +35,8 @@ export default function CreatorSpotlight() {
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold">Featured Creators</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
+        <div className="grid gap-4 md:grid-cols-2">
+          {[...Array(2)].map((_, i) => (
             <Skeleton key={i} className="h-64" />
           ))}
         </div>
@@ -72,7 +72,7 @@ export default function CreatorSpotlight() {
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {creators.map((creator) => (
           <Link key={creator.id} href={`/creators/${creator.username}`}>
             <Card className="cursor-pointer hover:shadow-md transition-shadow h-full">

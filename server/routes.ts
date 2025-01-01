@@ -744,7 +744,6 @@ export function registerRoutes(app: Express): Server {
             averageViews: creatorProfiles.averageViews,
             engagementRate: creatorProfiles.engagementRate,
             contentCategories: creatorProfiles.contentCategories,
-            ratePerPost: creatorProfiles.ratePerPost,
           }
         })
         .from(users)
@@ -817,28 +816,46 @@ export function registerRoutes(app: Express): Server {
 
         await db.insert(creatorProfiles).values(creatorProfileData);
 
-        // Fetch the newly created creators
-        return res.json(creatorProfileData.map((profile, index) => ({
-          ...insertedUsers[index],
-          profile,
+        // Return the newly created creators in the correct format
+        const formattedCreators = creatorProfileData.map((profile, index) => ({
+          id: insertedUsers[index].id,
+          username: insertedUsers[index].username,
+          displayName: insertedUsers[index].displayName,
+          bio: insertedUsers[index].bio,
+          avatar: insertedUsers[index].avatar,
+          profile: {
+            instagram: profile.instagram,
+            youtube: profile.youtube,
+            tiktok: profile.tiktok,
+            twitter: profile.twitter,
+            instagramFollowers: profile.instagramFollowers,
+            youtubeSubscribers: profile.youtubeSubscribers,
+            tiktokFollowers: profile.tiktokFollowers,
+            twitterFollowers: profile.twitterFollowers,
+            averageViews: profile.averageViews,
+            engagementRate: profile.engagementRate,
+            contentCategories: profile.contentCategories,
+          },
           totalReach: profile.instagramFollowers + profile.youtubeSubscribers + 
                      profile.tiktokFollowers + profile.twitterFollowers,
           engagementRate: parseFloat(profile.engagementRate.replace('%', ''))
-        })));
+        }));
+
+        return res.json(formattedCreators);
       }
 
-      // Calculate total reach and sort creators
+      // Calculate total reach and engagement metrics for sorting
       const sortedCreators = creators
         .map(creator => ({
           ...creator,
           totalReach: (creator.profile.instagramFollowers || 0) +
-            (creator.profile.youtubeSubscribers || 0) +
-            (creator.profile.tiktokFollowers || 0) +
-            (creator.profile.twitterFollowers || 0),
+                     (creator.profile.youtubeSubscribers || 0) +
+                     (creator.profile.tiktokFollowers || 0) +
+                     (creator.profile.twitterFollowers || 0),
           engagementRate: parseFloat(creator.profile.engagementRate?.replace('%', '') || '0')
         }))
         .sort((a, b) => {
-          // Updated scoring algorithm:
+          // Scoring algorithm:
           // 60% weight on total reach
           // 30% weight on engagement rate
           // 10% weight on average views
@@ -846,10 +863,10 @@ export function registerRoutes(app: Express): Server {
           const engagementWeight = 0.3;
           const viewsWeight = 0.1;
 
-          const aScore = (a.totalReach * reachWeight) + 
+          const aScore = (a.totalReach * reachWeight) +
                         (a.engagementRate * engagementWeight * 100000) +
                         ((a.profile.averageViews || 0) * viewsWeight);
-          const bScore = (b.totalReach * reachWeight) + 
+          const bScore = (b.totalReach * reachWeight) +
                         (b.engagementRate * engagementWeight * 100000) +
                         ((b.profile.averageViews || 0) * viewsWeight);
 
@@ -857,6 +874,7 @@ export function registerRoutes(app: Express): Server {
         })
         .slice(0, 2); // Get only top 2 creators
 
+      console.log('Returning spotlight creators:', sortedCreators);
       res.json(sortedCreators);
     } catch (error) {
       console.error("Error fetching spotlight creators:", error);

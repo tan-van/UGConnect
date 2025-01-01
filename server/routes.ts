@@ -724,6 +724,7 @@ export function registerRoutes(app: Express): Server {
   // Add after the GET /api/creators endpoint
   app.get("/api/creators/spotlight", async (_req, res) => {
     try {
+      console.log("Fetching spotlight creators...");
       // Get creators with their profiles and calculate total followers
       const creators = await db
         .select({
@@ -750,99 +751,7 @@ export function registerRoutes(app: Express): Server {
         .innerJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
 
-      // If no creators exist, create sample data
-      if (!creators || creators.length === 0) {
-        const sampleUsers = [
-          {
-            username: "techstar",
-            password: await hash("password123"),
-            email: "tech@star.com",
-            role: 'creator' as const,
-            displayName: "Tech Star",
-            bio: "Top tech reviewer with over 2M followers",
-            completedOnboarding: true,
-            createdAt: new Date(),
-          },
-          {
-            username: "lifestylepro",
-            password: await hash("password123"),
-            email: "lifestyle@pro.com",
-            role: 'creator' as const,
-            displayName: "Lifestyle Pro",
-            bio: "Lifestyle and wellness content creator with 1.5M+ engaged followers",
-            completedOnboarding: true,
-            createdAt: new Date(),
-          }
-        ];
-
-        const insertedUsers = await db.insert(users).values(sampleUsers).returning();
-
-        const creatorProfileData = [
-          {
-            userId: insertedUsers[0].id,
-            instagram: "techstar",
-            youtube: "techstar",
-            tiktok: "techstar",
-            twitter: "techstar",
-            instagramFollowers: 800000,
-            youtubeSubscribers: 1200000,
-            tiktokFollowers: 500000,
-            twitterFollowers: 300000,
-            averageViews: 250000,
-            engagementRate: "4.8%",
-            contentCategories: ['Technology', 'Reviews', 'Education'],
-            ratePerPost: "$2000-3000 per video",
-            availability: true,
-            lastUpdated: new Date(),
-          },
-          {
-            userId: insertedUsers[1].id,
-            instagram: "lifestylepro",
-            youtube: "lifestylepro",
-            tiktok: "lifestylepro",
-            twitter: "lifestylepro",
-            instagramFollowers: 600000,
-            youtubeSubscribers: 900000,
-            tiktokFollowers: 700000,
-            twitterFollowers: 200000,
-            averageViews: 180000,
-            engagementRate: "5.2%",
-            contentCategories: ['Lifestyle', 'Wellness', 'Fashion'],
-            ratePerPost: "$1500-2500 per post",
-            availability: true,
-            lastUpdated: new Date(),
-          }
-        ];
-
-        await db.insert(creatorProfiles).values(creatorProfileData);
-
-        // Return the newly created creators in the correct format
-        const formattedCreators = creatorProfileData.map((profile, index) => ({
-          id: insertedUsers[index].id,
-          username: insertedUsers[index].username,
-          displayName: insertedUsers[index].displayName,
-          bio: insertedUsers[index].bio,
-          avatar: insertedUsers[index].avatar,
-          profile: {
-            instagram: profile.instagram,
-            youtube: profile.youtube,
-            tiktok: profile.tiktok,
-            twitter: profile.twitter,
-            instagramFollowers: profile.instagramFollowers,
-            youtubeSubscribers: profile.youtubeSubscribers,
-            tiktokFollowers: profile.tiktokFollowers,
-            twitterFollowers: profile.twitterFollowers,
-            averageViews: profile.averageViews,
-            engagementRate: profile.engagementRate,
-            contentCategories: profile.contentCategories,
-          },
-          totalReach: profile.instagramFollowers + profile.youtubeSubscribers + 
-                     profile.tiktokFollowers + profile.twitterFollowers,
-          engagementRate: parseFloat(profile.engagementRate.replace('%', ''))
-        }));
-
-        return res.json(formattedCreators);
-      }
+      console.log("Initial creators query result:", creators);
 
       // Calculate total reach and engagement metrics for sorting
       const sortedCreators = creators

@@ -8,21 +8,23 @@ import { Link } from "wouter";
 interface SpotlightCreator {
   id: number;
   username: string;
-  displayName?: string;
-  bio?: string;
-  avatar?: string;
+  displayName: string | null;
+  bio: string | null;
+  avatar: string | null;
   totalReach: number;
   engagementRate: number;
   profile: {
-    instagram?: string;
-    youtube?: string;
-    tiktok?: string;
-    twitter?: string;
-    instagramFollowers?: number;
-    youtubeSubscribers?: number;
-    tiktokFollowers?: number;
-    twitterFollowers?: number;
-    contentCategories?: string[];
+    instagram: string | null;
+    youtube: string | null;
+    tiktok: string | null;
+    twitter: string | null;
+    instagramFollowers: number | null;
+    youtubeSubscribers: number | null;
+    tiktokFollowers: number | null;
+    twitterFollowers: number | null;
+    averageViews: number | null;
+    engagementRate: string | null;
+    contentCategories: string[] | null;
   };
 }
 

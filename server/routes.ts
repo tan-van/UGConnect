@@ -747,6 +747,7 @@ export function registerRoutes(app: Express): Server {
           }
         })
         .from(users)
+        .leftJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
       
       console.log("Found creators:", creators);

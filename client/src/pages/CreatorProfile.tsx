@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { PencilIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   BadgeCheck,
   DollarSign,

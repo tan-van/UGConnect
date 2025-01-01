@@ -1,18 +1,20 @@
 
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, useLocation } from "wouter";
 import { Job } from "@db/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/hooks/use-user";
 import { useState } from "react";
-import { Building2, MapPin, Timer, Calendar } from "lucide-react";
+import { Building2, MapPin, Timer, Calendar, Pencil, Trash } from "lucide-react";
 import { format } from "date-fns";
 
 export default function JobListingPage() {
   const { id } = useParams();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const { user } = useUser();
+  const queryClient = useQueryClient();
   const [coverLetter, setCoverLetter] = useState("");
 
   const { data: job, isLoading, error } = useQuery<Job>({
@@ -28,6 +30,28 @@ export default function JobListingPage() {
       const data = await res.json();
       if (!data) throw new Error('No job data found');
       return data;
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/jobs/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to delete job');
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Job deleted successfully" });
+      setLocation('/jobs');
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -59,6 +83,12 @@ export default function JobListingPage() {
     },
   });
 
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this job?')) {
+      deleteMutation.mutate();
+    }
+  };
+
   if (isLoading) {
     return <div className="p-8 text-center">Loading job details...</div>;
   }
@@ -71,10 +101,32 @@ export default function JobListingPage() {
     return <div className="p-8 text-center">Job not found</div>;
   }
 
+  const isOwner = user?.id === job.clientId;
+
   return (
     <div className="max-w-3xl mx-auto p-8 space-y-8">
       <div className="space-y-4">
-        <h1 className="text-4xl font-bold">{job.title}</h1>
+        <div className="flex justify-between items-start">
+          <h1 className="text-4xl font-bold">{job.title}</h1>
+          {isOwner && (
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setLocation(`/jobs/${id}/edit`)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="icon"
+                onClick={handleDelete}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
         
         <div className="flex flex-wrap gap-4 text-muted-foreground">
           <div className="flex items-center">

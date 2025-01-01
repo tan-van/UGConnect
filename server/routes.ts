@@ -751,9 +751,80 @@ export function registerRoutes(app: Express): Server {
         .innerJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
 
-      // If no creators exist, return empty array instead of 404
+      // If no creators exist, create sample data
       if (!creators || creators.length === 0) {
-        return res.json([]);
+        const sampleUsers = [
+          {
+            username: "techstar",
+            password: await hash("password123"),
+            email: "tech@star.com",
+            role: 'creator' as const,
+            displayName: "Tech Star",
+            bio: "Top tech reviewer with over 2M followers",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          },
+          {
+            username: "lifestylepro",
+            password: await hash("password123"),
+            email: "lifestyle@pro.com",
+            role: 'creator' as const,
+            displayName: "Lifestyle Pro",
+            bio: "Lifestyle and wellness content creator with 1.5M+ engaged followers",
+            completedOnboarding: true,
+            createdAt: new Date(),
+          }
+        ];
+
+        const insertedUsers = await db.insert(users).values(sampleUsers).returning();
+
+        const creatorProfileData = [
+          {
+            userId: insertedUsers[0].id,
+            instagram: "techstar",
+            youtube: "techstar",
+            tiktok: "techstar",
+            twitter: "techstar",
+            instagramFollowers: 800000,
+            youtubeSubscribers: 1200000,
+            tiktokFollowers: 500000,
+            twitterFollowers: 300000,
+            averageViews: 250000,
+            engagementRate: "4.8%",
+            contentCategories: ['Technology', 'Reviews', 'Education'],
+            ratePerPost: "$2000-3000 per video",
+            availability: true,
+            lastUpdated: new Date(),
+          },
+          {
+            userId: insertedUsers[1].id,
+            instagram: "lifestylepro",
+            youtube: "lifestylepro",
+            tiktok: "lifestylepro",
+            twitter: "lifestylepro",
+            instagramFollowers: 600000,
+            youtubeSubscribers: 900000,
+            tiktokFollowers: 700000,
+            twitterFollowers: 200000,
+            averageViews: 180000,
+            engagementRate: "5.2%",
+            contentCategories: ['Lifestyle', 'Wellness', 'Fashion'],
+            ratePerPost: "$1500-2500 per post",
+            availability: true,
+            lastUpdated: new Date(),
+          }
+        ];
+
+        await db.insert(creatorProfiles).values(creatorProfileData);
+
+        // Fetch the newly created creators
+        return res.json(creatorProfileData.map((profile, index) => ({
+          ...insertedUsers[index],
+          profile,
+          totalReach: profile.instagramFollowers + profile.youtubeSubscribers + 
+                     profile.tiktokFollowers + profile.twitterFollowers,
+          engagementRate: parseFloat(profile.engagementRate.replace('%', ''))
+        })));
       }
 
       // Calculate total reach and sort creators
@@ -767,16 +838,24 @@ export function registerRoutes(app: Express): Server {
           engagementRate: parseFloat(creator.profile.engagementRate?.replace('%', '') || '0')
         }))
         .sort((a, b) => {
-          // Sort by total reach and engagement rate
-          const reachWeight = 0.7;
+          // Updated scoring algorithm:
+          // 60% weight on total reach
+          // 30% weight on engagement rate
+          // 10% weight on average views
+          const reachWeight = 0.6;
           const engagementWeight = 0.3;
+          const viewsWeight = 0.1;
 
-          const aScore = (a.totalReach * reachWeight) + (a.engagementRate * engagementWeight * 100000);
-          const bScore = (b.totalReach * reachWeight) + (b.engagementRate * engagementWeight * 100000);
+          const aScore = (a.totalReach * reachWeight) + 
+                        (a.engagementRate * engagementWeight * 100000) +
+                        ((creator.profile.averageViews || 0) * viewsWeight);
+          const bScore = (b.totalReach * reachWeight) + 
+                        (b.engagementRate * engagementWeight * 100000) +
+                        ((creator.profile.averageViews || 0) * viewsWeight);
 
           return bScore - aScore;
         })
-        .slice(0, 5); // Get top 5 creators
+        .slice(0, 2); // Get only top 2 creators
 
       res.json(sortedCreators);
     } catch (error) {

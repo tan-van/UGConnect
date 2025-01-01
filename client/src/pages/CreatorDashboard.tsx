@@ -60,8 +60,16 @@ export default function CreatorDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+      window.location.reload(); // Reload to show the initialized profile
     },
   });
+
+  // Auto-initialize profile if not found
+  React.useEffect(() => {
+    if (!isProfileLoading && !profile) {
+      initializeMutation.mutate();
+    }
+  }, [isProfileLoading, profile]);
 
   const { data: profile, isLoading: isProfileLoading } = useQuery<CreatorProfile>({
     queryKey: ['/api/profile'],

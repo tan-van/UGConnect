@@ -848,10 +848,10 @@ export function registerRoutes(app: Express): Server {
 
           const aScore = (a.totalReach * reachWeight) + 
                         (a.engagementRate * engagementWeight * 100000) +
-                        ((creator.profile.averageViews || 0) * viewsWeight);
+                        ((a.profile.averageViews || 0) * viewsWeight);
           const bScore = (b.totalReach * reachWeight) + 
                         (b.engagementRate * engagementWeight * 100000) +
-                        ((creator.profile.averageViews || 0) * viewsWeight);
+                        ((b.profile.averageViews || 0) * viewsWeight);
 
           return bScore - aScore;
         })
@@ -895,7 +895,7 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "Rating must be between 1 and 5" });
       }
 
-      // Check if the creator exists and is actually a creator
+      //      // Check if the creator exists and is actually a creator
       console.log('Looking up creator with ID:', creatorId);
 
       const creator = await db

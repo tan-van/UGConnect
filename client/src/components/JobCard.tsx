@@ -62,11 +62,13 @@ export default function JobCard({ job, onApply }: JobCardProps) {
 
           <div className="space-y-3 pt-2">
             <div className="flex gap-2">
-              <Link href={`/jobs/${job.id}`} className="flex-1">
-                <Button variant="secondary" className="w-full">
-                  View Details
-                </Button>
-              </Link>
+              <Button 
+                variant="secondary" 
+                className="w-full" 
+                onClick={() => window.location.href = `/jobs/${job.id}`}
+              >
+                View Details
+              </Button>
               {onApply && (
                 <Button onClick={onApply} className="flex-1">
                   Apply Now

@@ -355,25 +355,13 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                   <FormControl>
                     <Input 
                       placeholder="e.g. Gaming, Technology, Reviews" 
-                      value={field.value?.join(', ') || ''}
                       onChange={(e) => {
-                        const categories = e.target.value
-                          .split(',')
-                          .map(cat => cat.trim())
-                          .filter(cat => cat.length > 0);
-                        field.onChange(categories);
-                      }}
-                      value=""
-                      onKeyDown={(e) => {
-                        if (e.key === ',') {
-                          e.preventDefault();
-                          const currentValue = e.currentTarget.value.trim();
-                          if (currentValue) {
-                            const existingCategories = field.value || [];
-                            if (!existingCategories.includes(currentValue)) {
-                              field.onChange([...existingCategories, currentValue]);
-                            }
-                            e.currentTarget.value = '';
+                        const value = e.target.value;
+                        if (value.endsWith(',')) {
+                          const newCategory = value.slice(0, -1).trim();
+                          if (newCategory && !field.value?.includes(newCategory)) {
+                            field.onChange([...(field.value || []), newCategory]);
+                            e.target.value = '';
                           }
                         }
                       }}

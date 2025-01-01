@@ -44,6 +44,7 @@ const profileSchema = z.object({
   averageViews: z.coerce.number().optional(),
   engagementRate: z.string().optional(),
   ratePerPost: z.string().optional(),
+  contentCategories: z.array(z.string()).default([]),
   availability: z.boolean().default(true),
 });
 
@@ -336,6 +337,56 @@ export default function CreatorProfileEditor({ initialData }: CreatorProfileEdit
                 )}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Content Categories */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Content Categories</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="contentCategories"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categories (comma-separated)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g. Gaming, Technology, Reviews" 
+                      value={field.value?.join(', ') || ''}
+                      onChange={(e) => {
+                        const categories = e.target.value
+                          .split(',')
+                          .map(cat => cat.trim())
+                          .filter(cat => cat.length > 0);
+                        field.onChange(categories);
+                      }}
+                    />
+                  </FormControl>
+                  <p className="text-sm text-muted-foreground">
+                    Add categories that best describe your content
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {field.value?.map((category, index) => (
+                      <Badge 
+                        key={index}
+                        variant="secondary"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          const newCategories = field.value?.filter((_, i) => i !== index);
+                          field.onChange(newCategories);
+                        }}
+                      >
+                        {category}
+                        <span className="ml-1">×</span>
+                      </Badge>
+                    ))}
+                  </div>
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
 

@@ -27,7 +27,7 @@ interface SpotlightCreator {
 }
 
 export default function CreatorSpotlight() {
-  const { data: creators, isLoading, error } = useQuery<SpotlightCreator[]>({
+  const { data: creators, isLoading } = useQuery<SpotlightCreator[]>({
     queryKey: ['/api/creators/spotlight'],
   });
 
@@ -44,10 +44,20 @@ export default function CreatorSpotlight() {
     );
   }
 
-  // If there's an error or no creators, fetch regular creators
-  if (error || !creators || creators.length === 0) {
-    console.log("Spotlight fetch error or no creators:", error);
-    return null;
+  if (!creators || creators.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Featured Creators</h2>
+            <p className="text-muted-foreground">Join now to be featured among our top creators!</p>
+          </div>
+        </div>
+        <Card className="p-6 text-center">
+          <p className="text-muted-foreground">No featured creators yet. Be the first to join!</p>
+        </Card>
+      </div>
+    );
   }
 
   return (

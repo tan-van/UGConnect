@@ -751,6 +751,11 @@ export function registerRoutes(app: Express): Server {
         .innerJoin(creatorProfiles, eq(users.id, creatorProfiles.userId))
         .where(eq(users.role, 'creator'));
 
+      // If no creators exist, return empty array instead of 404
+      if (!creators || creators.length === 0) {
+        return res.json([]);
+      }
+
       // Calculate total reach and sort creators
       const sortedCreators = creators
         .map(creator => ({
